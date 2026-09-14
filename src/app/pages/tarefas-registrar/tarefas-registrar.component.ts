@@ -147,18 +147,24 @@ export class TarefasRegistrarComponent implements OnInit {
    * anterior terminou — só cai para a hora atual se a anterior ainda
    * estiver em aberto (sem hora fim preenchida).
    */
-  adicionarLinha() {
+  private calcularInicioProximaLinha(): string {
     const ultima = this.linhas[this.linhas.length - 1];
 
-    let inicio: string;
     if (!ultima) {
-      inicio = this.horaAtual();
-    } else if (ultima.horaFim) {
-      inicio = ultima.horaFim;
-    } else {
-      inicio = this.horaAtual();
-      ultima.horaFim = inicio;
+      return this.horaAtual();
     }
+
+    if (ultima.horaFim) {
+      return ultima.horaFim;
+    }
+
+    const inicio = this.horaAtual();
+    ultima.horaFim = inicio;
+    return inicio;
+  }
+
+  adicionarLinha() {
+    const inicio = this.calcularInicioProximaLinha();
 
     this.linhas.push({
       horaInicio: inicio,
@@ -175,7 +181,7 @@ export class TarefasRegistrarComponent implements OnInit {
   }
 
   aplicarAtalho(atalho: Atalho) {
-    const inicio = this.horaAtual();
+    const inicio = this.calcularInicioProximaLinha();
     const [h, m] = inicio.split(":").map(Number);
 
     const totalMinutos = h * 60 + m + atalho.duracao_minutos;
