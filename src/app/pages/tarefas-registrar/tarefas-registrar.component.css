@@ -20,6 +20,12 @@
   text-transform: capitalize;
 }
 
+.linhas-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
 .linhas {
   display: flex;
   flex-direction: column;
@@ -30,17 +36,42 @@
   padding: 18px 20px;
 }
 
+.linha-tarefa.recolhida {
+  padding: 10px 20px;
+}
+
 .linha-topo {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.linha-tarefa.recolhida .linha-topo {
+  margin-bottom: 0;
+}
+
+.linha-chevron {
+  color: var(--cor-texto-fraco);
 }
 
 .linha-numero {
   font-weight: 600;
   font-size: 13px;
   color: var(--cor-texto-fraco);
+  white-space: nowrap;
+}
+
+.linha-resumo {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--cor-texto);
 }
 
 .linha-duracao {
@@ -51,10 +82,12 @@
   color: var(--cor-primaria);
   font-size: 12px;
   font-weight: 700;
+  flex-shrink: 0;
 }
 
 .linha-tarefa .linha-topo button {
   margin-left: 4px;
+  flex-shrink: 0;
 }
 
 .linha-campos {

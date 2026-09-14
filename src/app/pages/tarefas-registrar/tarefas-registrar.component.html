@@ -6,18 +6,33 @@
     <h2>{{ dataFormatada }}</h2>
   </div>
 
+  <div class="linhas-toolbar" *ngIf="linhas.length > 1">
+    <button mat-button type="button" (click)="abrirTodas()">
+      <mat-icon>unfold_more</mat-icon>
+      Abrir todas
+    </button>
+  </div>
+
   <form (ngSubmit)="salvar()">
   <div class="linhas">
-    <div class="card linha-tarefa" *ngFor="let linha of linhas; let i = index">
-      <div class="linha-topo">
+    <div class="card linha-tarefa" *ngFor="let linha of linhas; let i = index" [class.recolhida]="!linha.expandida">
+      <div class="linha-topo" (click)="toggleLinha(linha)">
+        <mat-icon class="linha-chevron">{{ linha.expandida ? "expand_less" : "expand_more" }}</mat-icon>
         <span class="linha-numero">Tarefa {{ i + 1 }}</span>
+        <span class="linha-resumo" *ngIf="!linha.expandida">{{ resumoLinha(linha) }}</span>
         <span class="linha-duracao" *ngIf="linha.horaFim">{{ duracaoLinha(linha) }}</span>
-        <button mat-icon-button type="button" color="warn" (click)="removerLinha(i)" title="Remover">
+        <button
+          mat-icon-button
+          type="button"
+          color="warn"
+          (click)="removerLinha(i); $event.stopPropagation()"
+          title="Remover"
+        >
           <mat-icon>delete</mat-icon>
         </button>
       </div>
 
-      <div class="linha-campos">
+      <div class="linha-campos" *ngIf="linha.expandida">
         <mat-form-field appearance="outline">
           <mat-label>Hora início</mat-label>
           <input matInput type="time" [(ngModel)]="linha.horaInicio" name="horaInicio-{{ i }}" required />

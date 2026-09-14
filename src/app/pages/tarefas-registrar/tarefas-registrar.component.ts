@@ -20,6 +20,7 @@ interface LinhaTarefa {
   solicitanteId: string;
   os: string;
   observacoes: string;
+  expandida: boolean;
 }
 
 interface TipoAtividade {
@@ -92,12 +93,11 @@ export class TarefasRegistrarComponent implements OnInit {
     const [ano, mes, dia] = dataISO.split("-").map(Number);
     const data = new Date(ano, mes - 1, dia);
 
-    return data.toLocaleDateString("pt-BR", {
-      weekday: "long",
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    });
+    const diaSemana = data.toLocaleDateString("pt-BR", { weekday: "long" });
+    const diaFormatado = String(dia).padStart(2, "0");
+    const mesFormatado = String(mes).padStart(2, "0");
+
+    return `${diaSemana}, ${diaFormatado}/${mesFormatado}/${ano}`;
   }
 
   private horaAtual(): string {
@@ -135,6 +135,7 @@ export class TarefasRegistrarComponent implements OnInit {
       solicitanteId: t.solicitante_id || "",
       os: t.os || "",
       observacoes: t.observacoes || "",
+      expandida: false,
     }));
   }
 
@@ -163,8 +164,16 @@ export class TarefasRegistrarComponent implements OnInit {
     return inicio;
   }
 
+  /** Recolhe todas as linhas atuais — usado antes de abrir uma linha nova. */
+  private recolherTodas() {
+    for (const linha of this.linhas) {
+      linha.expandida = false;
+    }
+  }
+
   adicionarLinha() {
     const inicio = this.calcularInicioProximaLinha();
+    this.recolherTodas();
 
     this.linhas.push({
       horaInicio: inicio,
@@ -173,6 +182,7 @@ export class TarefasRegistrarComponent implements OnInit {
       solicitanteId: "",
       os: "",
       observacoes: "",
+      expandida: true,
     });
   }
 
@@ -187,6 +197,8 @@ export class TarefasRegistrarComponent implements OnInit {
     const totalMinutos = h * 60 + m + atalho.duracao_minutos;
     const fim = `${String(Math.floor(totalMinutos / 60) % 24).padStart(2, "0")}:${String(totalMinutos % 60).padStart(2, "0")}`;
 
+    this.recolherTodas();
+
     this.linhas.push({
       horaInicio: inicio,
       horaFim: fim,
@@ -194,7 +206,35 @@ export class TarefasRegistrarComponent implements OnInit {
       solicitanteId: atalho.solicitante_id || "",
       os: atalho.os || "",
       observacoes: atalho.observacoes || "",
+      expandida: true,
     });
+  }
+
+  toggleLinha(linha: LinhaTarefa) {
+    linha.expandida = !linha.expandida;
+  }
+
+  abrirTodas() {
+    for (const linha of this.linhas) {
+      linha.expandida = true;
+    }
+  }
+
+  /** Resumo mostrado no cabeçalho da linha quando ela está recolhida. */
+  resumoLinha(linha: LinhaTarefa): string {
+    const partes = [`${linha.horaInicio || "—"} – ${linha.horaFim || "—"}`];
+
+    const tipo = this.tiposAtividade.find((t) => t.id === linha.tipoAtividadeId);
+    if (tipo) {
+      partes.push(tipo.nome);
+    }
+
+    const solicitante = this.solicitantes.find((s) => s.id === linha.solicitanteId);
+    if (solicitante) {
+      partes.push(solicitante.nome);
+    }
+
+    return partes.join(" · ");
   }
 
   /** Ao escolher um solicitante, sugere a OS padrão cadastrada nele — só se o campo ainda estiver vazio. */
