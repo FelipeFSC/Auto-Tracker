@@ -1,0 +1,89 @@
+<div class="registrar-page">
+  <div class="page-header">
+    <button mat-icon-button (click)="cancelar()" title="Voltar">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h2>{{ dataFormatada }}</h2>
+  </div>
+
+  <form (ngSubmit)="salvar()">
+  <div class="linhas">
+    <div class="card linha-tarefa" *ngFor="let linha of linhas; let i = index">
+      <div class="linha-topo">
+        <span class="linha-numero">Tarefa {{ i + 1 }}</span>
+        <span class="linha-duracao" *ngIf="linha.horaFim">{{ duracaoLinha(linha) }}</span>
+        <button mat-icon-button type="button" color="warn" (click)="removerLinha(i)" title="Remover">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+
+      <div class="linha-campos">
+        <mat-form-field appearance="outline">
+          <mat-label>Hora início</mat-label>
+          <input matInput type="time" [(ngModel)]="linha.horaInicio" name="horaInicio-{{ i }}" required />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Hora fim</mat-label>
+          <input matInput type="time" [(ngModel)]="linha.horaFim" name="horaFim-{{ i }}" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo de atividade</mat-label>
+          <mat-select [(ngModel)]="linha.tipoAtividadeId" name="tipo-{{ i }}">
+            <mat-option value="">Nenhum</mat-option>
+            <mat-option *ngFor="let tipo of tiposAtividade" [value]="tipo.id">{{ tipo.nome }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Solicitante</mat-label>
+          <mat-select
+            [(ngModel)]="linha.solicitanteId"
+            name="solicitante-{{ i }}"
+            (selectionChange)="onSolicitanteAlterado(linha)"
+          >
+            <mat-option value="">Nenhum</mat-option>
+            <mat-option *ngFor="let solicitante of solicitantes" [value]="solicitante.id">{{ solicitante.nome }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>OS</mat-label>
+          <input matInput [(ngModel)]="linha.os" name="os-{{ i }}" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Observações</mat-label>
+          <textarea matInput rows="2" [(ngModel)]="linha.observacoes" name="observacoes-{{ i }}"></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
+
+  <div class="acoes-atalhos">
+    <button mat-raised-button type="button" class="btn-nova-tarefa" (click)="adicionarLinha()">
+      <mat-icon>add</mat-icon>
+      Nova Tarefa
+    </button>
+
+    <button
+      mat-raised-button
+      type="button"
+      class="btn-atalho"
+      *ngFor="let atalho of atalhos"
+      (click)="aplicarAtalho(atalho)"
+    >
+      <mat-icon>bolt</mat-icon>
+      {{ atalho.nome }}
+    </button>
+  </div>
+
+  <div class="acoes-principais">
+    <button mat-stroked-button type="button" (click)="cancelar()" [disabled]="salvando">Cancelar</button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="salvando">
+      {{ salvando ? "Salvando..." : "Salvar" }}
+    </button>
+  </div>
+  </form>
+</div>

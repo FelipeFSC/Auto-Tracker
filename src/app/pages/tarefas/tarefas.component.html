@@ -1,0 +1,162 @@
+<div class="tarefas-page">
+  <div class="page-header">
+    <div class="month-nav">
+      <button mat-icon-button (click)="trocarMes(-1)">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+
+      <input
+        type="month"
+        [(ngModel)]="mesSelecionado"
+        (change)="onMesAlterado()"
+        class="month-input"
+      />
+
+      <button mat-icon-button (click)="trocarMes(1)">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+
+    <mat-form-field appearance="outline" class="busca-field">
+      <mat-label>Buscar por tipo, solicitante, OS...</mat-label>
+      <input matInput [(ngModel)]="busca" name="busca" />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" class="btn-nova-tarefa" (click)="abrirNovaTarefa()">
+      <mat-icon>add</mat-icon>
+      Nova Tarefa
+    </button>
+  </div>
+
+  <!-- MODAL: ESCOLHER DATA -->
+  <div class="modal-overlay" *ngIf="mostrarNovaData" (click)="mostrarNovaData = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3>Nova tarefa</h3>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Data</mat-label>
+        <input matInput type="date" [(ngModel)]="novaData" name="novaData" />
+      </mat-form-field>
+
+      <div class="modal-actions">
+        <button mat-stroked-button (click)="mostrarNovaData = false">Cancelar</button>
+        <button mat-raised-button color="primary" (click)="confirmarNovaTarefa()">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modo-exibicao-row">
+    <div class="modo-exibicao">
+      <button type="button" [class.ativo]="modoExibicao === 'detalhada'" (click)="definirModoExibicao('detalhada')">
+        Detalhada
+      </button>
+      <button type="button" [class.ativo]="modoExibicao === 'agrupada'" (click)="definirModoExibicao('agrupada')">
+        Agrupada
+      </button>
+    </div>
+  </div>
+
+  <!-- TABELA -->
+  <section class="card">
+    <table class="tabela-dias" *ngIf="diasFiltrados().length > 0">
+      <thead>
+        <tr>
+          <th class="col-expand"></th>
+          <th>Dia</th>
+          <th>Tarefas</th>
+          <th>Total</th>
+          <th class="col-menu"></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <ng-container *ngFor="let dia of diasFiltrados()">
+          <tr class="linha-dia" (click)="toggleExpandido(dia.data)">
+            <td class="col-expand">
+              <mat-icon class="icone-expand" [class.aberto]="estaExpandido(dia.data)">expand_more</mat-icon>
+            </td>
+            <td class="dia-nome">{{ dia.dataFormatada }}</td>
+            <td>{{ dia.tarefas.length }} tarefa(s)</td>
+            <td class="dia-total">{{ dia.totalLabel }}</td>
+            <td class="col-menu" (click)="$event.stopPropagation()">
+              <button mat-icon-button [matMenuTriggerFor]="menuDia">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menuDia="matMenu">
+                <button mat-menu-item (click)="editarDia(dia.data)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Editar</span>
+                </button>
+                <button mat-menu-item (click)="excluirDia(dia.data)">
+                  <mat-icon>delete</mat-icon>
+                  <span>Excluir</span>
+                </button>
+              </mat-menu>
+            </td>
+          </tr>
+
+          <tr class="linha-expandida" *ngIf="estaExpandido(dia.data)">
+            <td [attr.colspan]="5">
+              <!-- DETALHADA: um lançamento por linha -->
+              <table class="sub-tabela" *ngIf="modoExibicao === 'detalhada'">
+                <thead>
+                  <tr>
+                    <th>Início</th>
+                    <th>Fim</th>
+                    <th>Duração</th>
+                    <th>Tipo</th>
+                    <th>Solicitante</th>
+                    <th>OS</th>
+                    <th>Observações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let tarefa of dia.tarefas">
+                    <td>{{ tarefa.hora_inicio }}</td>
+                    <td>{{ tarefa.hora_fim || "—" }}</td>
+                    <td>{{ tarefa.duracaoLabel }}</td>
+                    <td>{{ tarefa.tipo_atividade_nome || "—" }}</td>
+                    <td>{{ tarefa.solicitante_nome || "—" }}</td>
+                    <td>{{ tarefa.os || "—" }}</td>
+                    <td>{{ tarefa.observacoes || "—" }}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- AGRUPADA: lançamentos com o mesmo tipo/solicitante/OS/observações somados -->
+              <table class="sub-tabela" *ngIf="modoExibicao === 'agrupada'">
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>Solicitante</th>
+                    <th>OS</th>
+                    <th>Observações</th>
+                    <th>Lançamentos</th>
+                    <th>Duração total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let grupo of dia.tarefasAgrupadas">
+                    <td>{{ grupo.tipoAtividadeNome || "—" }}</td>
+                    <td>{{ grupo.solicitanteNome || "—" }}</td>
+                    <td>{{ grupo.os || "—" }}</td>
+                    <td>{{ grupo.observacoes || "—" }}</td>
+                    <td>{{ grupo.quantidade }}x</td>
+                    <td class="grupo-total">{{ grupo.totalLabel }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+
+    <div class="empty" *ngIf="diasFiltrados().length === 0">
+      <mat-icon>event_busy</mat-icon>
+      <strong>Nenhuma tarefa neste mês</strong>
+      <span class="empty-hint">Clique em "Nova Tarefa" para registrar o seu dia.</span>
+    </div>
+  </section>
+</div>

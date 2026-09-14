@@ -1,0 +1,56 @@
+/* You can add global styles to this file, and also import other style files */
+
+@use "@angular/material" as mat;
+
+html {
+  color-scheme: light;
+
+  @include mat.theme(
+    (
+      color: (
+        theme-type: light,
+        primary: mat.$violet-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: (
+        brand-family: "Inter, Segoe UI, Arial, sans-serif",
+        plain-family: "Inter, Segoe UI, Arial, sans-serif",
+      ),
+      density: 0,
+    )
+  );
+}
+
+:root {
+  /* Identidade visual do Tracker — roxo como cor primária (botões de
+     ação principal, topbar), azul reservado para os atalhos ("Almoço",
+     "X1" etc.), conforme o protótipo. */
+  --cor-primaria: #6d4fe0;
+  --cor-primaria-hover: #5b3fc9;
+  --cor-primaria-fraca: #efe9fd;
+
+  --cor-atalho: #2f6fed;
+  --cor-atalho-hover: #2258c9;
+  --cor-atalho-fraca: #e8f0fe;
+
+  --cor-texto: #202124;
+  --cor-texto-fraco: #6b7280;
+  --cor-borda: #dfe3e8;
+  --raio-padrao: 10px;
+}
+
+body {
+  font-family: "Inter", "Segoe UI", Arial, Helvetica, sans-serif;
+  background-color: #f4f2fa;
+  color: var(--cor-texto);
+  margin: 0;
+  padding: 0;
+}
+
+.card {
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e7e9ee;
+  border-radius: var(--raio-padrao);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}

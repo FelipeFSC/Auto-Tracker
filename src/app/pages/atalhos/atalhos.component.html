@@ -1,0 +1,175 @@
+<div class="crud-page">
+  <div class="page-header">
+    <div>
+      <h2>Atalhos</h2>
+      <p>Botões de preenchimento rápido no formulário do dia (ex: "Almoço", "X1").</p>
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <!-- NOVO -->
+    <section class="card form-card">
+      <div class="card-header">
+        <div class="icon-wrapper">
+          <mat-icon>bolt</mat-icon>
+        </div>
+        <div>
+          <h3>Novo atalho</h3>
+          <p>Defina os valores padrão do botão.</p>
+        </div>
+      </div>
+
+      <form (submit)="adicionar($event)">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nome do botão</mat-label>
+          <input matInput [(ngModel)]="novo.nome" name="nome" placeholder="Ex: Almoço, X1..." />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Duração (minutos)</mat-label>
+          <input matInput type="number" min="1" [(ngModel)]="novo.duracaoMinutos" name="duracaoMinutos" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Tipo de atividade</mat-label>
+          <mat-select [(ngModel)]="novo.tipoAtividadeId" name="tipoAtividadeId">
+            <mat-option value="">Nenhum</mat-option>
+            <mat-option *ngFor="let tipo of tiposAtividade" [value]="tipo.id">{{ tipo.nome }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Solicitante</mat-label>
+          <mat-select [(ngModel)]="novo.solicitanteId" name="solicitanteId">
+            <mat-option value="">Nenhum</mat-option>
+            <mat-option *ngFor="let solicitante of solicitantes" [value]="solicitante.id">{{ solicitante.nome }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>OS</mat-label>
+          <input matInput [(ngModel)]="novo.os" name="os" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Observações</mat-label>
+          <textarea matInput rows="2" [(ngModel)]="novo.observacoes" name="observacoes"></textarea>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" class="btn-full" type="submit">
+          <mat-icon>add</mat-icon>
+          Adicionar atalho
+        </button>
+      </form>
+    </section>
+
+    <!-- LISTA -->
+    <section class="card list-card">
+      <div class="card-header">
+        <div>
+          <h3>Seus atalhos</h3>
+          <p>{{ atalhosFiltrados().length }} atalho(s)</p>
+        </div>
+
+        <div class="filtro-status">
+          <button type="button" [class.ativo]="filtroStatus === 'ativos'" (click)="definirFiltroStatus('ativos')">
+            Ativos
+          </button>
+          <button type="button" [class.ativo]="filtroStatus === 'inativos'" (click)="definirFiltroStatus('inativos')">
+            Inativos
+          </button>
+        </div>
+      </div>
+
+      <div class="item-list">
+        <div class="item" *ngFor="let atalho of atalhosFiltrados()">
+          <ng-container *ngIf="editandoId !== atalho.id">
+            <div class="item-main">
+              <div class="item-icon atalho-icon">
+                <mat-icon>bolt</mat-icon>
+              </div>
+
+              <div class="item-info">
+                <strong>{{ atalho.nome }}</strong>
+                <small>
+                  {{ atalho.duracao_minutos }} min
+                  <ng-container *ngIf="nomeTipoAtividade(atalho.tipo_atividade_id) as tipoNome">
+                    · {{ tipoNome }}
+                  </ng-container>
+                  <ng-container *ngIf="nomeSolicitante(atalho.solicitante_id) as solicitanteNome">
+                    · {{ solicitanteNome }}
+                  </ng-container>
+                </small>
+              </div>
+
+              <div class="item-actions">
+                <ng-container *ngIf="atalho.ativo; else inativoAcoes">
+                  <button mat-icon-button (click)="editar(atalho)" title="Editar">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="remover(atalho.id)" title="Excluir">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </ng-container>
+                <ng-template #inativoAcoes>
+                  <button mat-stroked-button (click)="reativar(atalho.id)">
+                    <mat-icon>restore</mat-icon>
+                    Reativar
+                  </button>
+                </ng-template>
+              </div>
+            </div>
+          </ng-container>
+
+          <form class="item-edit-form" *ngIf="editandoId === atalho.id" (submit)="salvarEdicao($event, atalho)">
+            <mat-form-field appearance="outline">
+              <mat-label>Nome</mat-label>
+              <input matInput [(ngModel)]="edicao.nome" name="nomeEdicao" autofocus />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Duração (min)</mat-label>
+              <input matInput type="number" min="1" [(ngModel)]="edicao.duracaoMinutos" name="duracaoEdicao" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo de atividade</mat-label>
+              <mat-select [(ngModel)]="edicao.tipoAtividadeId" name="tipoEdicao">
+                <mat-option value="">Nenhum</mat-option>
+                <mat-option *ngFor="let tipo of tiposAtividade" [value]="tipo.id">{{ tipo.nome }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Solicitante</mat-label>
+              <mat-select [(ngModel)]="edicao.solicitanteId" name="solicitanteEdicao">
+                <mat-option value="">Nenhum</mat-option>
+                <mat-option *ngFor="let solicitante of solicitantes" [value]="solicitante.id">{{ solicitante.nome }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>OS</mat-label>
+              <input matInput [(ngModel)]="edicao.os" name="osEdicao" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Observações</mat-label>
+              <textarea matInput rows="2" [(ngModel)]="edicao.observacoes" name="observacoesEdicao"></textarea>
+            </mat-form-field>
+
+            <div class="item-edit-actions">
+              <button mat-raised-button color="primary" type="submit">Salvar</button>
+              <button mat-stroked-button type="button" (click)="cancelarEdicao()">Cancelar</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="empty" *ngIf="atalhosFiltrados().length === 0">
+          <mat-icon>bolt</mat-icon>
+          <strong>Nenhum atalho encontrado</strong>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

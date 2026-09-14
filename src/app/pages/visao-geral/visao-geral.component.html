@@ -1,0 +1,55 @@
+<div class="visao-geral-page">
+  <div class="page-header">
+    <div>
+      <h2>Visão geral</h2>
+      <p>Resumo das horas trabalhadas no mês.</p>
+    </div>
+
+    <div class="month-nav">
+      <button type="button" (click)="trocarMes(-1)">
+        <span class="material-icons">chevron_left</span>
+      </button>
+
+      <input type="month" [(ngModel)]="mesSelecionado" (change)="onMesAlterado()" class="month-input" />
+
+      <button type="button" (click)="trocarMes(1)">
+        <span class="material-icons">chevron_right</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="resumo-cards">
+    <div class="card resumo-card">
+      <span class="material-icons">schedule</span>
+      <div>
+        <strong>{{ totalHorasMes }}</strong>
+        <span>Horas no mês</span>
+      </div>
+    </div>
+
+    <div class="card resumo-card">
+      <span class="material-icons">task_alt</span>
+      <div>
+        <strong>{{ totalTarefasMes }}</strong>
+        <span>Tarefas registradas</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="graficos-grid">
+    <section class="card grafico-card grafico-largo">
+      <h3>Horas por dia</h3>
+      <div #graficoDias class="grafico"></div>
+    </section>
+
+    <section class="card grafico-card">
+      <h3>Horas por tipo de atividade</h3>
+      <div #graficoTipos class="grafico"></div>
+    </section>
+
+    <section class="card grafico-card">
+      <h3>Horas por solicitante</h3>
+      <div #graficoSolicitantes class="grafico"></div>
+    </section>
+  </div>
+</div>

@@ -1,0 +1,45 @@
+<header class="topbar">
+
+  <a routerLink="/visao-geral" class="brand">
+    <span class="material-icons">schedule</span>
+    <span>tracker</span>
+  </a>
+
+  <nav class="topbar-center">
+    <a routerLink="/visao-geral" routerLinkActive="active">Visão geral</a>
+    <a routerLink="/tarefas" routerLinkActive="active">Tarefas</a>
+  </nav>
+
+  <div class="topbar-right">
+    <button
+      type="button"
+      class="gear-btn"
+      [class.active]="menuAberto"
+      (click)="menuAberto = !menuAberto"
+    >
+      <span class="material-icons">settings</span>
+    </button>
+
+    <div class="gear-menu" *ngIf="menuAberto">
+      <a routerLink="/tipos-atividade" routerLinkActive="active" (click)="menuAberto = false">
+        <span class="material-icons">category</span>
+        Tipos de atividade
+      </a>
+      <a routerLink="/solicitantes" routerLinkActive="active" (click)="menuAberto = false">
+        <span class="material-icons">groups</span>
+        Solicitantes
+      </a>
+      <a routerLink="/atalhos" routerLinkActive="active" (click)="menuAberto = false">
+        <span class="material-icons">bolt</span>
+        Atalhos
+      </a>
+    </div>
+  </div>
+
+</header>
+
+<div class="gear-overlay" *ngIf="menuAberto" (click)="menuAberto = false"></div>
+
+<main class="container">
+  <router-outlet />
+</main>

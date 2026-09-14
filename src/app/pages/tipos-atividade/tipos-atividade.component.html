@@ -1,0 +1,127 @@
+<div class="crud-page">
+  <div class="page-header">
+    <div>
+      <h2>Tipos de atividade</h2>
+      <p>Cadastre os tipos usados para classificar suas tarefas.</p>
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <!-- NOVO -->
+    <section class="card form-card">
+      <div class="card-header">
+        <div class="icon-wrapper">
+          <mat-icon>category</mat-icon>
+        </div>
+        <div>
+          <h3>Novo tipo</h3>
+          <p>Adicione um tipo de atividade.</p>
+        </div>
+      </div>
+
+      <form (submit)="adicionar($event)">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nome</mat-label>
+          <input matInput [(ngModel)]="nome" name="nome" placeholder="Ex: Reunião, Desenvolvimento..." />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Ícone (material icon)</mat-label>
+          <input matInput [(ngModel)]="icone" name="icone" placeholder="Ex: groups, code, coffee..." />
+          <mat-icon matSuffix *ngIf="icone">{{ icone }}</mat-icon>
+        </mat-form-field>
+
+        <div class="form-group">
+          <label>Cor</label>
+          <div class="color-input">
+            <input [(ngModel)]="cor" name="cor" type="color" />
+            <span>{{ cor }}</span>
+          </div>
+        </div>
+
+        <button mat-raised-button color="primary" class="btn-full" type="submit">
+          <mat-icon>add</mat-icon>
+          Adicionar tipo
+        </button>
+      </form>
+    </section>
+
+    <!-- LISTA -->
+    <section class="card list-card">
+      <div class="card-header">
+        <div>
+          <h3>Seus tipos</h3>
+          <p>{{ tiposFiltrados().length }} tipo(s)</p>
+        </div>
+
+        <div class="filtro-status">
+          <button type="button" [class.ativo]="filtroStatus === 'ativos'" (click)="definirFiltroStatus('ativos')">
+            Ativos
+          </button>
+          <button type="button" [class.ativo]="filtroStatus === 'inativos'" (click)="definirFiltroStatus('inativos')">
+            Inativos
+          </button>
+        </div>
+      </div>
+
+      <div class="item-list">
+        <div class="item" *ngFor="let tipo of tiposFiltrados()">
+          <ng-container *ngIf="editandoId !== tipo.id">
+            <div class="item-main">
+              <div class="item-icon" [style.background]="tipo.cor || '#6d4fe0'">
+                <mat-icon>{{ tipo.icone || "category" }}</mat-icon>
+              </div>
+
+              <div class="item-info">
+                <strong>{{ tipo.nome }}</strong>
+              </div>
+
+              <div class="item-actions">
+                <ng-container *ngIf="tipo.ativo; else inativoAcoes">
+                  <button mat-icon-button (click)="editar(tipo)" title="Editar">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="remover(tipo.id)" title="Excluir">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </ng-container>
+                <ng-template #inativoAcoes>
+                  <button mat-stroked-button (click)="reativar(tipo.id)">
+                    <mat-icon>restore</mat-icon>
+                    Reativar
+                  </button>
+                </ng-template>
+              </div>
+            </div>
+          </ng-container>
+
+          <form class="item-edit-form" *ngIf="editandoId === tipo.id" (submit)="salvarEdicao($event, tipo)">
+            <mat-form-field appearance="outline">
+              <mat-label>Nome</mat-label>
+              <input matInput [(ngModel)]="nomeEdicao" name="nomeEdicao" autofocus />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Ícone</mat-label>
+              <input matInput [(ngModel)]="iconeEdicao" name="iconeEdicao" />
+            </mat-form-field>
+
+            <div class="color-input">
+              <input [(ngModel)]="corEdicao" name="corEdicao" type="color" />
+            </div>
+
+            <div class="item-edit-actions">
+              <button mat-raised-button color="primary" type="submit">Salvar</button>
+              <button mat-stroked-button type="button" (click)="cancelarEdicao()">Cancelar</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="empty" *ngIf="tiposFiltrados().length === 0">
+          <mat-icon>category</mat-icon>
+          <strong>Nenhum tipo encontrado</strong>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

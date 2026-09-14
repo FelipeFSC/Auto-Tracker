@@ -1,0 +1,115 @@
+<div class="crud-page">
+  <div class="page-header">
+    <div>
+      <h2>Solicitantes</h2>
+      <p>Cadastre quem solicita as tarefas.</p>
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <!-- NOVO -->
+    <section class="card form-card">
+      <div class="card-header">
+        <div class="icon-wrapper">
+          <mat-icon>groups</mat-icon>
+        </div>
+        <div>
+          <h3>Novo solicitante</h3>
+          <p>Adicione um solicitante.</p>
+        </div>
+      </div>
+
+      <form (submit)="adicionar($event)">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nome</mat-label>
+          <input matInput [(ngModel)]="nome" name="nome" placeholder="Ex: Coca-Cola, Itaú..." />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>OS padrão</mat-label>
+          <input matInput [(ngModel)]="osPadrao" name="osPadrao" placeholder="Sugerida ao selecionar este solicitante" />
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" class="btn-full" type="submit">
+          <mat-icon>add</mat-icon>
+          Adicionar solicitante
+        </button>
+      </form>
+    </section>
+
+    <!-- LISTA -->
+    <section class="card list-card">
+      <div class="card-header">
+        <div>
+          <h3>Seus solicitantes</h3>
+          <p>{{ solicitantesFiltrados().length }} solicitante(s)</p>
+        </div>
+
+        <div class="filtro-status">
+          <button type="button" [class.ativo]="filtroStatus === 'ativos'" (click)="definirFiltroStatus('ativos')">
+            Ativos
+          </button>
+          <button type="button" [class.ativo]="filtroStatus === 'inativos'" (click)="definirFiltroStatus('inativos')">
+            Inativos
+          </button>
+        </div>
+      </div>
+
+      <div class="item-list">
+        <div class="item" *ngFor="let solicitante of solicitantesFiltrados()">
+          <ng-container *ngIf="editandoId !== solicitante.id">
+            <div class="item-main">
+              <div class="item-icon">
+                <mat-icon>person</mat-icon>
+              </div>
+
+              <div class="item-info">
+                <strong>{{ solicitante.nome }}</strong>
+                <small *ngIf="solicitante.os_padrao">OS padrão: {{ solicitante.os_padrao }}</small>
+              </div>
+
+              <div class="item-actions">
+                <ng-container *ngIf="solicitante.ativo; else inativoAcoes">
+                  <button mat-icon-button (click)="editar(solicitante)" title="Editar">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="remover(solicitante.id)" title="Excluir">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </ng-container>
+                <ng-template #inativoAcoes>
+                  <button mat-stroked-button (click)="reativar(solicitante.id)">
+                    <mat-icon>restore</mat-icon>
+                    Reativar
+                  </button>
+                </ng-template>
+              </div>
+            </div>
+          </ng-container>
+
+          <form class="item-edit-form" *ngIf="editandoId === solicitante.id" (submit)="salvarEdicao($event, solicitante)">
+            <mat-form-field appearance="outline">
+              <mat-label>Nome</mat-label>
+              <input matInput [(ngModel)]="nomeEdicao" name="nomeEdicao" autofocus />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>OS padrão</mat-label>
+              <input matInput [(ngModel)]="osPadraoEdicao" name="osPadraoEdicao" />
+            </mat-form-field>
+
+            <div class="item-edit-actions">
+              <button mat-raised-button color="primary" type="submit">Salvar</button>
+              <button mat-stroked-button type="button" (click)="cancelarEdicao()">Cancelar</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="empty" *ngIf="solicitantesFiltrados().length === 0">
+          <mat-icon>groups</mat-icon>
+          <strong>Nenhum solicitante encontrado</strong>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

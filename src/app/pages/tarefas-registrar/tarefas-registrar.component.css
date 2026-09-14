@@ -1,0 +1,102 @@
+.registrar-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px;
+  min-height: 100%;
+  padding-bottom: 100px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.linhas {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.linha-tarefa {
+  padding: 18px 20px;
+}
+
+.linha-topo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.linha-numero {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--cor-texto-fraco);
+}
+
+.linha-duracao {
+  margin-left: auto;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--cor-primaria-fraca);
+  color: var(--cor-primaria);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.linha-tarefa .linha-topo button {
+  margin-left: 4px;
+}
+
+.linha-campos {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px 16px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.acoes-atalhos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 24px 0;
+}
+
+.btn-nova-tarefa {
+  background: var(--cor-primaria) !important;
+  color: white !important;
+}
+
+.btn-atalho {
+  background: var(--cor-atalho) !important;
+  color: white !important;
+}
+
+.acoes-principais {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 0;
+  background: linear-gradient(to top, #f4f2fa 70%, transparent);
+}
+
+@media (max-width: 700px) {
+  .linha-campos {
+    grid-template-columns: 1fr;
+  }
+}
