@@ -319,6 +319,15 @@ export class DatabaseService {
     return `${horas}h${String(min).padStart(2, "0")}`;
   }
 
+  /**
+   * Formata uma duração em minutos como horas decimais com vírgula, ex.:
+   * "1,50". Equivalente à fórmula usada na planilha do sistema para o qual
+   * os dados são enviados: =((hora_fim - hora_inicio) * 1440/60).
+   */
+  formatarDuracaoDecimal(minutos: number): string {
+    return (minutos / 60).toFixed(2).replace(".", ",");
+  }
+
   // =====================================================================
   // TAREFAS
   // =====================================================================

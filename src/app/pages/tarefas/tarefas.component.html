@@ -78,7 +78,7 @@
             </td>
             <td class="dia-nome">{{ dia.dataFormatada }}</td>
             <td>{{ dia.tarefas.length }} tarefa(s)</td>
-            <td class="dia-total">{{ dia.totalLabel }}</td>
+            <td class="dia-total">{{ modoExibicao === 'agrupada' ? dia.totalLabelDecimal : dia.totalLabel }}</td>
             <td class="col-menu" (click)="$event.stopPropagation()">
               <button mat-icon-button [matMenuTriggerFor]="menuDia">
                 <mat-icon>more_vert</mat-icon>
