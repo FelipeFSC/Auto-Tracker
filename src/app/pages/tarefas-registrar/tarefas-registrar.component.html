@@ -59,8 +59,22 @@
             (selectionChange)="onSolicitanteAlterado(linha)"
           >
             <mat-option value="">Nenhum</mat-option>
-            <mat-option *ngFor="let solicitante of solicitantes" [value]="solicitante.id">{{ solicitante.nome }}</mat-option>
+            <mat-option
+              *ngFor="let solicitante of solicitantes"
+              [value]="solicitante.id"
+              [matTooltip]="solicitante.descricao || ''"
+              matTooltipPosition="right"
+              matTooltipClass="tooltip-descricao"
+            >{{ solicitante.nome }}</mat-option>
           </mat-select>
+          <mat-icon
+            matSuffix
+            class="solicitante-info"
+            *ngIf="descricaoSolicitante(linha)"
+            [matTooltip]="descricaoSolicitante(linha)"
+            matTooltipClass="tooltip-descricao"
+            (click)="$event.stopPropagation()"
+          >info_outline</mat-icon>
         </mat-form-field>
 
         <mat-form-field appearance="outline">

@@ -14,6 +14,7 @@ interface Solicitante {
   id: string;
   nome: string;
   os_padrao: string | null;
+  descricao: string | null;
   ativo: number;
 }
 
@@ -39,11 +40,13 @@ export class SolicitantesComponent implements OnInit {
   // NOVO
   nome = "";
   osPadrao = "";
+  descricao = "";
 
   // EDIÇÃO
   editandoId: string | null = null;
   nomeEdicao = "";
   osPadraoEdicao = "";
+  descricaoEdicao = "";
 
   constructor(private db: DatabaseService) {}
 
@@ -76,13 +79,20 @@ export class SolicitantesComponent implements OnInit {
     }
 
     await this.db.run(
-      `INSERT INTO solicitantes (id, usuario_id, nome, os_padrao)
-       VALUES (?, ?, ?, ?)`,
-      [this.db.gerarId(), USUARIO_LOCAL_ID, this.nome.trim(), this.osPadrao.trim() || null],
+      `INSERT INTO solicitantes (id, usuario_id, nome, os_padrao, descricao)
+       VALUES (?, ?, ?, ?, ?)`,
+      [
+        this.db.gerarId(),
+        USUARIO_LOCAL_ID,
+        this.nome.trim(),
+        this.osPadrao.trim() || null,
+        this.descricao.trim() || null,
+      ],
     );
 
     this.nome = "";
     this.osPadrao = "";
+    this.descricao = "";
 
     await this.carregar();
   }
@@ -91,6 +101,7 @@ export class SolicitantesComponent implements OnInit {
     this.editandoId = solicitante.id;
     this.nomeEdicao = solicitante.nome;
     this.osPadraoEdicao = solicitante.os_padrao || "";
+    this.descricaoEdicao = solicitante.descricao || "";
   }
 
   cancelarEdicao() {
@@ -106,8 +117,13 @@ export class SolicitantesComponent implements OnInit {
     }
 
     await this.db.run(
-      `UPDATE solicitantes SET nome = ?, os_padrao = ? WHERE id = ?`,
-      [this.nomeEdicao.trim(), this.osPadraoEdicao.trim() || null, solicitante.id],
+      `UPDATE solicitantes SET nome = ?, os_padrao = ?, descricao = ? WHERE id = ?`,
+      [
+        this.nomeEdicao.trim(),
+        this.osPadraoEdicao.trim() || null,
+        this.descricaoEdicao.trim() || null,
+        solicitante.id,
+      ],
     );
 
     this.cancelarEdicao();

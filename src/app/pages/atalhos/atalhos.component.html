@@ -31,6 +31,14 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Aplicar duração</mat-label>
+          <mat-select [(ngModel)]="novo.aplicarDuracao" name="aplicarDuracao">
+            <mat-option value="fim">No fim: define a hora fim</mat-option>
+            <mat-option value="inicio">No começo: intervalo antes da tarefa</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
           <mat-label>Tipo de atividade</mat-label>
           <mat-select [(ngModel)]="novo.tipoAtividadeId" name="tipoAtividadeId">
             <mat-option value="">Nenhum</mat-option>
@@ -92,7 +100,7 @@
               <div class="item-info">
                 <strong>{{ atalho.nome }}</strong>
                 <small>
-                  {{ atalho.duracao_minutos }} min
+                  {{ atalho.duracao_minutos }} min {{ atalho.aplicar_duracao === "inicio" ? "no começo" : "no fim" }}
                   <ng-container *ngIf="nomeTipoAtividade(atalho.tipo_atividade_id) as tipoNome">
                     · {{ tipoNome }}
                   </ng-container>
@@ -130,6 +138,14 @@
             <mat-form-field appearance="outline">
               <mat-label>Duração (min)</mat-label>
               <input matInput type="number" min="1" [(ngModel)]="edicao.duracaoMinutos" name="duracaoEdicao" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Aplicar duração</mat-label>
+              <mat-select [(ngModel)]="edicao.aplicarDuracao" name="aplicarDuracaoEdicao">
+                <mat-option value="fim">No fim: define a hora fim</mat-option>
+                <mat-option value="inicio">No começo: intervalo antes da tarefa</mat-option>
+              </mat-select>
             </mat-form-field>
 
             <mat-form-field appearance="outline">

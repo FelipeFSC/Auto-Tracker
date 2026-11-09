@@ -30,6 +30,12 @@
           <input matInput [(ngModel)]="osPadrao" name="osPadrao" placeholder="Sugerida ao selecionar este solicitante" />
         </mat-form-field>
 
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Descrição</mat-label>
+          <textarea matInput rows="3" [(ngModel)]="descricao" name="descricao" placeholder="Ex: sistemas deste solicitante"></textarea>
+          <mat-hint>Aparece como dica ao registrar uma tarefa.</mat-hint>
+        </mat-form-field>
+
         <button mat-raised-button color="primary" class="btn-full" type="submit">
           <mat-icon>add</mat-icon>
           Adicionar solicitante
@@ -66,6 +72,7 @@
               <div class="item-info">
                 <strong>{{ solicitante.nome }}</strong>
                 <small *ngIf="solicitante.os_padrao">OS padrão: {{ solicitante.os_padrao }}</small>
+                <small class="item-descricao" *ngIf="solicitante.descricao">{{ solicitante.descricao }}</small>
               </div>
 
               <div class="item-actions">
@@ -96,6 +103,11 @@
             <mat-form-field appearance="outline">
               <mat-label>OS padrão</mat-label>
               <input matInput [(ngModel)]="osPadraoEdicao" name="osPadraoEdicao" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Descrição</mat-label>
+              <textarea matInput rows="3" [(ngModel)]="descricaoEdicao" name="descricaoEdicao"></textarea>
             </mat-form-field>
 
             <div class="item-edit-actions">

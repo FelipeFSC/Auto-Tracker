@@ -54,3 +54,10 @@ body {
   border-radius: var(--raio-padrao);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
+
+/* Global porque o tooltip do Material é renderizado fora do componente, no overlay. */
+.mat-mdc-tooltip.tooltip-descricao .mdc-tooltip__surface {
+  max-width: 320px;
+  text-align: left;
+  white-space: pre-line;
+}

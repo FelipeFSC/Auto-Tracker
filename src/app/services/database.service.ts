@@ -166,6 +166,7 @@ export class DatabaseService {
         usuario_id TEXT NOT NULL,
         nome TEXT NOT NULL,
         os_padrao TEXT,
+        descricao TEXT,
         ativo INTEGER NOT NULL DEFAULT 1,
 
         FOREIGN KEY (usuario_id)
@@ -180,6 +181,7 @@ export class DatabaseService {
         usuario_id TEXT NOT NULL,
         nome TEXT NOT NULL,
         duracao_minutos INTEGER NOT NULL,
+        aplicar_duracao TEXT NOT NULL DEFAULT 'fim',
         tipo_atividade_id TEXT,
         solicitante_id TEXT,
         os TEXT,
@@ -234,7 +236,10 @@ export class DatabaseService {
   // =====================================================================
 
   private async migrarColunas(): Promise<void> {
-    const tentativas: [string, string][] = [];
+    const tentativas: [string, string][] = [
+      ["solicitantes", "descricao TEXT"],
+      ["atalhos", "aplicar_duracao TEXT NOT NULL DEFAULT 'fim'"],
+    ];
 
     for (const [tabela, colunaDef] of tentativas) {
       try {

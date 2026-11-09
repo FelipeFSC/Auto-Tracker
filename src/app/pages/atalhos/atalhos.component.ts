@@ -11,10 +11,14 @@ import {
   USUARIO_LOCAL_ID,
 } from "../../services/database.service";
 
+/** "fim": a tarefa dura esse tempo. "inicio": a tarefa começa depois desse intervalo (ex: almoço). */
+type AplicarDuracao = "fim" | "inicio";
+
 interface Atalho {
   id: string;
   nome: string;
   duracao_minutos: number;
+  aplicar_duracao: AplicarDuracao;
   tipo_atividade_id: string | null;
   solicitante_id: string | null;
   os: string | null;
@@ -36,6 +40,7 @@ interface Solicitante {
 interface FormularioAtalho {
   nome: string;
   duracaoMinutos: number | null;
+  aplicarDuracao: AplicarDuracao;
   tipoAtividadeId: string;
   solicitanteId: string;
   os: string;
@@ -46,6 +51,7 @@ function formularioVazio(): FormularioAtalho {
   return {
     nome: "",
     duracaoMinutos: null,
+    aplicarDuracao: "fim",
     tipoAtividadeId: "",
     solicitanteId: "",
     os: "",
@@ -142,13 +148,14 @@ export class AtalhosComponent implements OnInit {
 
     await this.db.run(
       `INSERT INTO atalhos
-        (id, usuario_id, nome, duracao_minutos, tipo_atividade_id, solicitante_id, os, observacoes, ordem)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (id, usuario_id, nome, duracao_minutos, aplicar_duracao, tipo_atividade_id, solicitante_id, os, observacoes, ordem)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         this.db.gerarId(),
         USUARIO_LOCAL_ID,
         this.novo.nome.trim(),
         this.novo.duracaoMinutos,
+        this.novo.aplicarDuracao,
         this.novo.tipoAtividadeId || null,
         this.novo.solicitanteId || null,
         this.novo.os.trim() || null,
@@ -166,6 +173,7 @@ export class AtalhosComponent implements OnInit {
     this.edicao = {
       nome: atalho.nome,
       duracaoMinutos: atalho.duracao_minutos,
+      aplicarDuracao: atalho.aplicar_duracao,
       tipoAtividadeId: atalho.tipo_atividade_id || "",
       solicitanteId: atalho.solicitante_id || "",
       os: atalho.os || "",
@@ -188,11 +196,12 @@ export class AtalhosComponent implements OnInit {
 
     await this.db.run(
       `UPDATE atalhos
-       SET nome = ?, duracao_minutos = ?, tipo_atividade_id = ?, solicitante_id = ?, os = ?, observacoes = ?
+       SET nome = ?, duracao_minutos = ?, aplicar_duracao = ?, tipo_atividade_id = ?, solicitante_id = ?, os = ?, observacoes = ?
        WHERE id = ?`,
       [
         this.edicao.nome.trim(),
         this.edicao.duracaoMinutos,
+        this.edicao.aplicarDuracao,
         this.edicao.tipoAtividadeId || null,
         this.edicao.solicitanteId || null,
         this.edicao.os.trim() || null,

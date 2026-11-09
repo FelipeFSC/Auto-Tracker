@@ -7,6 +7,7 @@ import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
+import { MatTooltipModule } from "@angular/material/tooltip";
 import {
   DatabaseService,
   USUARIO_LOCAL_ID,
@@ -32,12 +33,14 @@ interface Solicitante {
   id: string;
   nome: string;
   os_padrao: string | null;
+  descricao: string | null;
 }
 
 interface Atalho {
   id: string;
   nome: string;
   duracao_minutos: number;
+  aplicar_duracao: "fim" | "inicio";
   tipo_atividade_id: string | null;
   solicitante_id: string | null;
   os: string | null;
@@ -55,6 +58,7 @@ interface Atalho {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
+    MatTooltipModule,
   ],
   templateUrl: "./tarefas-registrar.component.html",
   styleUrl: "./tarefas-registrar.component.css",
@@ -111,7 +115,7 @@ export class TarefasRegistrarComponent implements OnInit {
         "SELECT id, nome FROM tipos_atividade WHERE ativo = 1 ORDER BY nome",
       ),
       this.db.query<Solicitante>(
-        "SELECT id, nome, os_padrao FROM solicitantes WHERE ativo = 1 ORDER BY nome",
+        "SELECT id, nome, os_padrao, descricao FROM solicitantes WHERE ativo = 1 ORDER BY nome",
       ),
       this.db.query<Atalho>(
         "SELECT * FROM atalhos WHERE ativo = 1 ORDER BY ordem, nome",
@@ -164,6 +168,13 @@ export class TarefasRegistrarComponent implements OnInit {
     return inicio;
   }
 
+  private somarMinutos(hora: string, minutos: number): string {
+    const [h, m] = hora.split(":").map(Number);
+    const total = h * 60 + m + minutos;
+
+    return `${String(Math.floor(total / 60) % 24).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+  }
+
   /** Recolhe todas as linhas atuais — usado antes de abrir uma linha nova. */
   private recolherTodas() {
     for (const linha of this.linhas) {
@@ -191,17 +202,15 @@ export class TarefasRegistrarComponent implements OnInit {
   }
 
   aplicarAtalho(atalho: Atalho) {
-    const inicio = this.calcularInicioProximaLinha();
-    const [h, m] = inicio.split(":").map(Number);
-
-    const totalMinutos = h * 60 + m + atalho.duracao_minutos;
-    const fim = `${String(Math.floor(totalMinutos / 60) % 24).padStart(2, "0")}:${String(totalMinutos % 60).padStart(2, "0")}`;
+    const base = this.calcularInicioProximaLinha();
+    const depoisDaDuracao = this.somarMinutos(base, atalho.duracao_minutos);
+    const duracaoNoInicio = atalho.aplicar_duracao === "inicio";
 
     this.recolherTodas();
 
     this.linhas.push({
-      horaInicio: inicio,
-      horaFim: fim,
+      horaInicio: duracaoNoInicio ? depoisDaDuracao : base,
+      horaFim: duracaoNoInicio ? "" : depoisDaDuracao,
       tipoAtividadeId: atalho.tipo_atividade_id || "",
       solicitanteId: atalho.solicitante_id || "",
       os: atalho.os || "",
@@ -237,16 +246,16 @@ export class TarefasRegistrarComponent implements OnInit {
     return partes.join(" · ");
   }
 
-  /** Ao escolher um solicitante, sugere a OS padrão cadastrada nele — só se o campo ainda estiver vazio. */
+  /** Ao trocar o solicitante, a OS passa a ser a padrão dele (ou fica vazia, se não houver) — o usuário ainda pode sobrescrever. */
   onSolicitanteAlterado(linha: LinhaTarefa) {
-    if (linha.os) {
-      return;
-    }
-
     const solicitante = this.solicitantes.find((s) => s.id === linha.solicitanteId);
-    if (solicitante?.os_padrao) {
-      linha.os = solicitante.os_padrao;
-    }
+    linha.os = solicitante?.os_padrao || "";
+  }
+
+  /** Descrição do solicitante da linha — só informativa, nunca vai para as observações da tarefa. */
+  descricaoSolicitante(linha: LinhaTarefa): string {
+    const solicitante = this.solicitantes.find((s) => s.id === linha.solicitanteId);
+    return solicitante?.descricao || "";
   }
 
   duracaoLinha(linha: LinhaTarefa): string {

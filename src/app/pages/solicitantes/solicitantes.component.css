@@ -188,6 +188,10 @@
   font-size: 12px;
 }
 
+.item-info .item-descricao {
+  white-space: pre-line;
+}
+
 .item-actions {
   display: flex;
   align-items: center;
