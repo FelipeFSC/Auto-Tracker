@@ -23,7 +23,7 @@
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
 
-    <button mat-raised-button color="primary" class="btn-nova-tarefa" (click)="abrirNovaTarefa()">
+    <button mat-raised-button color="primary" class="btn-nova-tarefa" title="Ctrl+N" (click)="abrirNovaTarefa()">
       <mat-icon>add</mat-icon>
       Nova Tarefa
     </button>
@@ -47,6 +47,13 @@
   </div>
 
   <div class="modo-exibicao-row">
+    <div class="saldo-mes" *ngIf="saldoMesMinutos !== null">
+      Saldo do mês:
+      <strong [class.saldo-positivo]="saldoMesMinutos > 0" [class.saldo-negativo]="saldoMesMinutos < 0">
+        {{ saldoMesLabel }}
+      </strong>
+    </div>
+
     <div class="modo-exibicao">
       <button type="button" [class.ativo]="modoExibicao === 'detalhada'" (click)="definirModoExibicao('detalhada')">
         Detalhada
@@ -66,6 +73,7 @@
           <th>Dia</th>
           <th>Tarefas</th>
           <th>Total</th>
+          <th *ngIf="saldoMesMinutos !== null">Saldo</th>
           <th class="col-menu"></th>
         </tr>
       </thead>
@@ -79,6 +87,15 @@
             <td class="dia-nome">{{ dia.dataFormatada }}</td>
             <td>{{ dia.tarefas.length }} tarefa(s)</td>
             <td class="dia-total">{{ modoExibicao === 'agrupada' ? dia.totalLabelDecimal : dia.totalLabel }}</td>
+            <td
+              class="dia-saldo"
+              *ngIf="saldoMesMinutos !== null"
+              [class.saldo-positivo]="dia.saldoMinutos !== null && dia.saldoMinutos > 0"
+              [class.saldo-negativo]="dia.saldoMinutos !== null && dia.saldoMinutos < 0"
+              [title]="dia.saldoMinutos === null ? 'Há tarefa em aberto neste dia' : ''"
+            >
+              {{ dia.saldoLabel }}
+            </td>
             <td class="col-menu" (click)="$event.stopPropagation()">
               <button mat-icon-button [matMenuTriggerFor]="menuDia">
                 <mat-icon>more_vert</mat-icon>
@@ -97,7 +114,7 @@
           </tr>
 
           <tr class="linha-expandida" *ngIf="estaExpandido(dia.data)">
-            <td [attr.colspan]="5">
+            <td [attr.colspan]="saldoMesMinutos !== null ? 6 : 5">
               <!-- DETALHADA: um lançamento por linha -->
               <table class="sub-tabela" *ngIf="modoExibicao === 'detalhada'">
                 <thead>

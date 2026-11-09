@@ -26,6 +26,14 @@ export interface NovaTarefa {
   observacoes: string | null;
 }
 
+export interface Configuracoes {
+  /** "HH:MM" sugerido como início da primeira tarefa de um dia novo. */
+  hora_entrada: string | null;
+  /** Sem jornada configurada, o saldo de horas não é calculado. */
+  jornada_minutos: number | null;
+  tolerancia_minutos: number;
+}
+
 @Injectable({
   providedIn: "root",
 })
@@ -109,6 +117,11 @@ export class DatabaseService {
       `INSERT OR IGNORE INTO usuarios (id, nome) VALUES (?, 'Usuário Local')`,
       [USUARIO_LOCAL_ID],
     );
+
+    await this.db.execute(
+      `INSERT OR IGNORE INTO configuracoes (usuario_id) VALUES (?)`,
+      [USUARIO_LOCAL_ID],
+    );
   }
 
   // =====================================================================
@@ -142,6 +155,19 @@ export class DatabaseService {
       CREATE TABLE IF NOT EXISTS usuarios (
         id TEXT PRIMARY KEY,
         nome TEXT NOT NULL
+      )
+    `);
+
+    await this.db.execute(`
+      CREATE TABLE IF NOT EXISTS configuracoes (
+        usuario_id TEXT PRIMARY KEY,
+        hora_entrada TEXT,
+        jornada_minutos INTEGER,
+        tolerancia_minutos INTEGER NOT NULL DEFAULT 0,
+
+        FOREIGN KEY (usuario_id)
+          REFERENCES usuarios (id)
+          ON DELETE CASCADE
       )
     `);
 
@@ -331,6 +357,63 @@ export class DatabaseService {
    */
   formatarDuracaoDecimal(minutos: number): string {
     return (minutos / 60).toFixed(2).replace(".", ",");
+  }
+
+  /**
+   * Formata um saldo em minutos com sinal, ex.: "+1h30", "-45min".
+   */
+  formatarSaldo(minutos: number): string {
+    if (minutos === 0) {
+      return "0h00";
+    }
+
+    return `${minutos > 0 ? "+" : "-"}${this.formatarDuracao(Math.abs(minutos))}`;
+  }
+
+  // =====================================================================
+  // CONFIGURAÇÕES
+  // =====================================================================
+
+  async obterConfiguracoes(): Promise<Configuracoes> {
+    const [configuracoes] = await this.query<Configuracoes>(
+      `SELECT hora_entrada, jornada_minutos, tolerancia_minutos
+       FROM configuracoes
+       WHERE usuario_id = ?`,
+      [USUARIO_LOCAL_ID],
+    );
+
+    return configuracoes;
+  }
+
+  /**
+   * Saldo de um dia em relação à jornada. Sábado e domingo não têm jornada,
+   * então todo o tempo trabalhado conta como positivo. Uma diferença dentro
+   * da tolerância vale zero; acima dela, conta a diferença inteira.
+   *
+   * Retorna null quando não há jornada configurada ou quando alguma tarefa
+   * ainda está em aberto (o total do dia ainda não é definitivo).
+   */
+  calcularSaldoDiaMinutos(
+    data: string,
+    tarefas: { hora_inicio: string; hora_fim: string | null }[],
+    configuracoes: Configuracoes,
+  ): number | null {
+    if (configuracoes.jornada_minutos === null || tarefas.some((t) => !t.hora_fim)) {
+      return null;
+    }
+
+    const totalMinutos = tarefas.reduce(
+      (soma, t) => soma + (this.calcularDuracaoMinutos(t.hora_inicio, t.hora_fim) ?? 0),
+      0,
+    );
+
+    const [ano, mes, dia] = data.split("-").map(Number);
+    const diaSemana = new Date(ano, mes - 1, dia).getDay();
+    const fimDeSemana = diaSemana === 0 || diaSemana === 6;
+
+    const diferenca = totalMinutos - (fimDeSemana ? 0 : configuracoes.jornada_minutos);
+
+    return Math.abs(diferenca) <= configuracoes.tolerancia_minutos ? 0 : diferenca;
   }
 
   // =====================================================================

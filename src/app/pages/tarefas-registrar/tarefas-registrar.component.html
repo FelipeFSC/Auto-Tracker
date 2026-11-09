@@ -15,11 +15,22 @@
 
   <form (ngSubmit)="salvar()">
   <div class="linhas">
-    <div class="card linha-tarefa" *ngFor="let linha of linhas; let i = index" [class.recolhida]="!linha.expandida">
+    <div
+      class="card linha-tarefa"
+      *ngFor="let linha of linhas; let i = index"
+      [class.recolhida]="!linha.expandida"
+      [class.com-problema]="problemasLinha(i).length > 0"
+    >
       <div class="linha-topo" (click)="toggleLinha(linha)">
         <mat-icon class="linha-chevron">{{ linha.expandida ? "expand_less" : "expand_more" }}</mat-icon>
         <span class="linha-numero">Tarefa {{ i + 1 }}</span>
         <span class="linha-resumo" *ngIf="!linha.expandida">{{ resumoLinha(linha) }}</span>
+        <mat-icon
+          class="linha-aviso"
+          *ngIf="problemasLinha(i).length > 0"
+          [matTooltip]="problemasLinha(i).join('\n')"
+          matTooltipClass="tooltip-descricao"
+        >warning</mat-icon>
         <span class="linha-duracao" *ngIf="linha.horaFim">{{ duracaoLinha(linha) }}</span>
         <button
           mat-icon-button
@@ -33,6 +44,10 @@
       </div>
 
       <div class="linha-campos" *ngIf="linha.expandida">
+        <div class="linha-problemas full-width" *ngIf="problemasLinha(i).length > 0">
+          <div *ngFor="let problema of problemasLinha(i)">{{ problema }}</div>
+        </div>
+
         <mat-form-field appearance="outline">
           <mat-label>Hora início</mat-label>
           <input matInput type="time" [(ngModel)]="linha.horaInicio" name="horaInicio-{{ i }}" required />
@@ -91,7 +106,7 @@
   </div>
 
   <div class="acoes-atalhos">
-    <button mat-raised-button type="button" class="btn-nova-tarefa" (click)="adicionarLinha()">
+    <button mat-raised-button type="button" class="btn-nova-tarefa" title="Ctrl+N" (click)="adicionarLinha()">
       <mat-icon>add</mat-icon>
       Nova Tarefa
     </button>
@@ -109,8 +124,19 @@
   </div>
 
   <div class="acoes-principais">
+    <div class="resumo-dia">
+      <span>Total: <strong>{{ totalDiaLabel() }}</strong></span>
+      <span *ngIf="saldoDiaMinutos() as saldo; else saldoZeroOuVazio">
+        Saldo:
+        <strong [class.saldo-positivo]="saldo > 0" [class.saldo-negativo]="saldo < 0">{{ formatarSaldo(saldo) }}</strong>
+      </span>
+      <ng-template #saldoZeroOuVazio>
+        <span *ngIf="saldoDiaMinutos() === 0">Saldo: <strong>{{ formatarSaldo(0) }}</strong></span>
+      </ng-template>
+    </div>
+
     <button mat-stroked-button type="button" (click)="cancelar()" [disabled]="salvando">Cancelar</button>
-    <button mat-raised-button color="primary" type="submit" [disabled]="salvando">
+    <button mat-raised-button color="primary" type="submit" title="Ctrl+S" [disabled]="salvando">
       {{ salvando ? "Salvando..." : "Salvar" }}
     </button>
   </div>

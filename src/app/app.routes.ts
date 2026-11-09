@@ -1,4 +1,5 @@
 import { Routes } from "@angular/router";
+import type { TarefasRegistrarComponent } from "./pages/tarefas-registrar/tarefas-registrar.component";
 
 export const routes: Routes = [
   {
@@ -26,6 +27,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import("./pages/tarefas-registrar/tarefas-registrar.component")
         .then((m) => m.TarefasRegistrarComponent),
+    canDeactivate: [(componente: TarefasRegistrarComponent) => componente.podeSair()],
   },
 
   {
@@ -47,5 +49,12 @@ export const routes: Routes = [
     loadComponent: () =>
       import("./pages/atalhos/atalhos.component")
         .then((m) => m.AtalhosComponent),
+  },
+
+  {
+    path: "configuracoes",
+    loadComponent: () =>
+      import("./pages/configuracoes/configuracoes.component")
+        .then((m) => m.ConfiguracoesComponent),
   },
 ];

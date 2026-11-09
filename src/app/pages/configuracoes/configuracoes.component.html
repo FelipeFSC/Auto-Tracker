@@ -1,0 +1,36 @@
+<div class="configuracoes-page">
+  <div class="page-header">
+    <h2>Configurações</h2>
+    <p>Defina seu horário de trabalho para o sistema calcular o saldo de horas.</p>
+  </div>
+
+  <section class="card">
+    <form (submit)="salvar($event)" (input)="salvo = false">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Hora de entrada</mat-label>
+        <input matInput type="time" [(ngModel)]="horaEntrada" name="horaEntrada" />
+        <mat-hint>Início da primeira tarefa de um dia novo. Vazio: usa a hora atual.</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Jornada diária (horas:minutos)</mat-label>
+        <input matInput type="time" [(ngModel)]="jornada" name="jornada" />
+        <mat-hint>Vale de segunda a sexta. Vazio: o saldo não é exibido.</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Tolerância (minutos)</mat-label>
+        <input matInput type="number" min="0" step="1" [(ngModel)]="toleranciaMinutos" name="toleranciaMinutos" />
+        <mat-hint>Até esse limite, o saldo do dia é zero. Acima dele, conta a diferença inteira.</mat-hint>
+      </mat-form-field>
+
+      <div class="acoes">
+        <span class="mensagem-salvo" *ngIf="salvo">
+          <mat-icon>check_circle</mat-icon>
+          Configurações salvas
+        </span>
+        <button mat-raised-button color="primary" type="submit">Salvar</button>
+      </div>
+    </form>
+  </section>
+</div>

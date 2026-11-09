@@ -34,6 +34,16 @@
         <span>Tarefas registradas</span>
       </div>
     </div>
+
+    <div class="card resumo-card" *ngIf="saldoMesMinutos !== null">
+      <span class="material-icons">balance</span>
+      <div>
+        <strong [class.saldo-positivo]="saldoMesMinutos > 0" [class.saldo-negativo]="saldoMesMinutos < 0">
+          {{ saldoMesLabel }}
+        </strong>
+        <span>Saldo do mês</span>
+      </div>
+    </div>
   </div>
 
   <div class="graficos-grid">

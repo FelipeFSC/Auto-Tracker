@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, HostListener, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
@@ -9,6 +9,7 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import {
+  Configuracoes,
   DatabaseService,
   USUARIO_LOCAL_ID,
   NovaTarefa,
@@ -73,7 +74,22 @@ export class TarefasRegistrarComponent implements OnInit {
   solicitantes: Solicitante[] = [];
   atalhos: Atalho[] = [];
 
+  configuracoes: Configuracoes = {
+    hora_entrada: null,
+    jornada_minutos: null,
+    tolerancia_minutos: 0,
+  };
+
   salvando = false;
+
+  /**
+   * Salvar substitui o dia inteiro, então salvar antes de carregar as
+   * tarefas existentes apagaria o dia. Fica false até o carregamento terminar.
+   */
+  carregado = false;
+
+  /** Estado das linhas ao abrir o dia ou salvar, comparado para detectar alterações não salvas. */
+  private estadoSalvo = this.serializarLinhas();
 
   constructor(
     private db: DatabaseService,
@@ -91,6 +107,47 @@ export class TarefasRegistrarComponent implements OnInit {
     if (this.linhas.length === 0) {
       this.adicionarLinha();
     }
+
+    this.estadoSalvo = this.serializarLinhas();
+    this.carregado = true;
+  }
+
+  @HostListener("window:keydown", ["$event"])
+  onAtalhoTeclado(event: KeyboardEvent) {
+    if (!this.carregado || !event.ctrlKey || event.shiftKey || event.altKey) {
+      return;
+    }
+
+    const tecla = event.key.toLowerCase();
+    if (tecla !== "s" && tecla !== "n") {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (event.repeat) {
+      return;
+    }
+
+    if (tecla === "n") {
+      this.adicionarLinha();
+    } else if (!this.salvando) {
+      this.salvar();
+    }
+  }
+
+  private serializarLinhas(): string {
+    return JSON.stringify(
+      this.linhas.map(({ expandida, ...campos }) => campos),
+    );
+  }
+
+  /** Usado pelo canDeactivate da rota: toda saída da tela passa por aqui. */
+  podeSair(): boolean {
+    return (
+      this.serializarLinhas() === this.estadoSalvo ||
+      confirm("Existem alterações não salvas. Sair sem salvar?")
+    );
   }
 
   private formatarData(dataISO: string): string {
@@ -104,13 +161,21 @@ export class TarefasRegistrarComponent implements OnInit {
     return `${diaSemana}, ${diaFormatado}/${mesFormatado}/${ano}`;
   }
 
+  private ehHoje(): boolean {
+    const hoje = new Date();
+    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+    const dia = String(hoje.getDate()).padStart(2, "0");
+
+    return this.data === `${hoje.getFullYear()}-${mes}-${dia}`;
+  }
+
   private horaAtual(): string {
     const agora = new Date();
     return `${String(agora.getHours()).padStart(2, "0")}:${String(agora.getMinutes()).padStart(2, "0")}`;
   }
 
   private async carregarCadastros() {
-    [this.tiposAtividade, this.solicitantes, this.atalhos] = await Promise.all([
+    [this.tiposAtividade, this.solicitantes, this.atalhos, this.configuracoes] = await Promise.all([
       this.db.query<TipoAtividade>(
         "SELECT id, nome FROM tipos_atividade WHERE ativo = 1 ORDER BY nome",
       ),
@@ -120,6 +185,7 @@ export class TarefasRegistrarComponent implements OnInit {
       this.db.query<Atalho>(
         "SELECT * FROM atalhos WHERE ativo = 1 ORDER BY ordem, nome",
       ),
+      this.db.obterConfiguracoes(),
     ]);
   }
 
@@ -148,19 +214,26 @@ export class TarefasRegistrarComponent implements OnInit {
   // =========================================================
 
   /**
-   * A primeira tarefa do dia começa agora. As seguintes começam onde a
-   * anterior terminou — só cai para a hora atual se a anterior ainda
-   * estiver em aberto (sem hora fim preenchida).
+   * A primeira tarefa do dia começa na hora de entrada configurada (ou
+   * agora, se não houver). As seguintes começam onde a anterior terminou —
+   * só cai para a hora atual se a anterior ainda estiver em aberto (sem
+   * hora fim preenchida). Em outro dia, a hora atual não significa nada: a
+   * anterior continua em aberto e a nova começa junto, gerando o aviso de
+   * sobreposição para o usuário corrigir.
    */
   private calcularInicioProximaLinha(): string {
     const ultima = this.linhas[this.linhas.length - 1];
 
     if (!ultima) {
-      return this.horaAtual();
+      return this.configuracoes.hora_entrada || this.horaAtual();
     }
 
     if (ultima.horaFim) {
       return ultima.horaFim;
+    }
+
+    if (!this.ehHoje()) {
+      return ultima.horaInicio;
     }
 
     const inicio = this.horaAtual();
@@ -198,8 +271,100 @@ export class TarefasRegistrarComponent implements OnInit {
   }
 
   removerLinha(index: number) {
+    const linha = this.linhas[index];
+    const temDados =
+      linha.horaFim || linha.tipoAtividadeId || linha.solicitanteId || linha.os || linha.observacoes;
+
+    if (temDados && !confirm(`Remover a Tarefa ${index + 1}?`)) {
+      return;
+    }
+
     this.linhas.splice(index, 1);
   }
+
+  // =========================================================
+  // VALIDAÇÃO DE HORÁRIOS
+  // =========================================================
+
+  private minutosDoDia(hora: string): number {
+    const [h, m] = hora.split(":").map(Number);
+    return h * 60 + m;
+  }
+
+  private fimAntesDoInicio(linha: LinhaTarefa): boolean {
+    return (
+      !!linha.horaInicio &&
+      !!linha.horaFim &&
+      this.minutosDoDia(linha.horaFim) < this.minutosDoDia(linha.horaInicio)
+    );
+  }
+
+  /** Tarefa em aberto ocupa só o minuto de início, já que ainda não tem fim. */
+  private sobrepoe(a: LinhaTarefa, b: LinhaTarefa): boolean {
+    if (!a.horaInicio || !b.horaInicio || this.fimAntesDoInicio(a) || this.fimAntesDoInicio(b)) {
+      return false;
+    }
+
+    const inicioA = this.minutosDoDia(a.horaInicio);
+    const inicioB = this.minutosDoDia(b.horaInicio);
+    const fimA = a.horaFim ? this.minutosDoDia(a.horaFim) : inicioA + 1;
+    const fimB = b.horaFim ? this.minutosDoDia(b.horaFim) : inicioB + 1;
+
+    return inicioA < fimB && inicioB < fimA;
+  }
+
+  problemasLinha(index: number): string[] {
+    const linha = this.linhas[index];
+    const problemas: string[] = [];
+
+    if (this.fimAntesDoInicio(linha)) {
+      problemas.push("A hora fim está antes da hora início.");
+    }
+
+    const conflitos = this.linhas
+      .map((outra, i) => ({ outra, i }))
+      .filter(({ outra, i }) => i !== index && this.sobrepoe(linha, outra))
+      .map(({ i }) => `Tarefa ${i + 1}`);
+
+    if (conflitos.length > 0) {
+      problemas.push(`Horário sobreposto com: ${conflitos.join(", ")}.`);
+    }
+
+    return problemas;
+  }
+
+  // =========================================================
+  // RESUMO DO DIA
+  // =========================================================
+
+  private tarefasParaCalculo() {
+    return this.linhas.map((linha) => ({
+      hora_inicio: linha.horaInicio,
+      hora_fim: linha.horaFim || null,
+    }));
+  }
+
+  totalDiaLabel(): string {
+    const total = this.tarefasParaCalculo().reduce(
+      (soma, t) => soma + (this.db.calcularDuracaoMinutos(t.hora_inicio, t.hora_fim) ?? 0),
+      0,
+    );
+
+    return this.db.formatarDuracao(total);
+  }
+
+  saldoDiaMinutos(): number | null {
+    return this.db.calcularSaldoDiaMinutos(this.data, this.tarefasParaCalculo(), this.configuracoes);
+  }
+
+  formatarSaldo(minutos: number): string {
+    return this.db.formatarSaldo(minutos);
+  }
+
+  // =========================================================
+  // ATALHOS
+  // =========================================================
+
 
   aplicarAtalho(atalho: Atalho) {
     const base = this.calcularInicioProximaLinha();
@@ -272,6 +437,10 @@ export class TarefasRegistrarComponent implements OnInit {
   // =========================================================
 
   async salvar() {
+    if (!this.carregado) {
+      return;
+    }
+
     if (this.linhas.length === 0) {
       alert("Adicione ao menos uma tarefa.");
       return;
@@ -282,6 +451,11 @@ export class TarefasRegistrarComponent implements OnInit {
         alert("Toda tarefa precisa de uma hora de início.");
         return;
       }
+    }
+
+    const temProblemas = this.linhas.some((_, i) => this.problemasLinha(i).length > 0);
+    if (temProblemas && !confirm("Há tarefas com problemas de horário. Salvar mesmo assim?")) {
+      return;
     }
 
     this.salvando = true;
@@ -298,7 +472,11 @@ export class TarefasRegistrarComponent implements OnInit {
 
       await this.db.salvarTarefasDoDia(this.data, tarefas);
 
+      this.estadoSalvo = this.serializarLinhas();
       this.router.navigate(["/tarefas"]);
+    } catch (erro) {
+      console.error(erro);
+      alert("Não foi possível salvar. Os dados anteriores deste dia foram mantidos.");
     } finally {
       this.salvando = false;
     }

@@ -74,6 +74,24 @@
   color: var(--cor-texto);
 }
 
+.linha-tarefa.com-problema {
+  border-color: var(--cor-aviso);
+}
+
+.linha-aviso {
+  color: var(--cor-aviso);
+  flex-shrink: 0;
+}
+
+.linha-problemas {
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--cor-aviso-fraca);
+  color: var(--cor-aviso);
+  font-size: 13px;
+}
+
 .linha-duracao {
   margin-left: auto;
   padding: 3px 10px;
@@ -131,6 +149,15 @@
   gap: 10px;
   padding: 16px 0;
   background: linear-gradient(to top, #f4f2fa 70%, transparent);
+}
+
+.resumo-dia {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-right: auto;
+  font-size: 13px;
+  color: var(--cor-texto-fraco);
 }
 
 @media (max-width: 700px) {

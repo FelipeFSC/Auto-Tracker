@@ -11,6 +11,7 @@ import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import * as echarts from "echarts";
 import {
+  Configuracoes,
   DatabaseService,
   USUARIO_LOCAL_ID,
 } from "../../services/database.service";
@@ -41,6 +42,10 @@ export class VisaoGeralComponent implements OnInit, AfterViewInit, OnDestroy {
 
   totalHorasMes = "0h00";
   totalTarefasMes = 0;
+
+  /** null quando não há jornada configurada — o card de saldo fica oculto. */
+  saldoMesMinutos: number | null = null;
+  saldoMesLabel = "";
 
   private tarefas: TarefaMes[] = [];
 
@@ -110,7 +115,28 @@ export class VisaoGeralComponent implements OnInit, AfterViewInit, OnDestroy {
     );
 
     this.calcularResumo();
+    this.calcularSaldoMes(await this.db.obterConfiguracoes());
     this.renderizarGraficos();
+  }
+
+  private calcularSaldoMes(configuracoes: Configuracoes) {
+    if (configuracoes.jornada_minutos === null) {
+      this.saldoMesMinutos = null;
+      return;
+    }
+
+    const porDia = new Map<string, TarefaMes[]>();
+    for (const tarefa of this.tarefas) {
+      porDia.set(tarefa.data, [...(porDia.get(tarefa.data) ?? []), tarefa]);
+    }
+
+    let saldo = 0;
+    for (const [data, tarefas] of porDia) {
+      saldo += this.db.calcularSaldoDiaMinutos(data, tarefas, configuracoes) ?? 0;
+    }
+
+    this.saldoMesMinutos = saldo;
+    this.saldoMesLabel = this.db.formatarSaldo(saldo);
   }
 
   private duracaoTarefa(tarefa: TarefaMes): number {

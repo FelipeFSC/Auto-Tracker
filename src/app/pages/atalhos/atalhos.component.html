@@ -90,7 +90,7 @@
       </div>
 
       <div class="item-list">
-        <div class="item" *ngFor="let atalho of atalhosFiltrados()">
+        <div class="item" *ngFor="let atalho of atalhosFiltrados(); let primeiro = first; let ultimo = last">
           <ng-container *ngIf="editandoId !== atalho.id">
             <div class="item-main">
               <div class="item-icon atalho-icon">
@@ -112,6 +112,12 @@
 
               <div class="item-actions">
                 <ng-container *ngIf="atalho.ativo; else inativoAcoes">
+                  <button mat-icon-button [disabled]="primeiro" (click)="mover(atalho, -1)" title="Mover para cima">
+                    <mat-icon>arrow_upward</mat-icon>
+                  </button>
+                  <button mat-icon-button [disabled]="ultimo" (click)="mover(atalho, 1)" title="Mover para baixo">
+                    <mat-icon>arrow_downward</mat-icon>
+                  </button>
                   <button mat-icon-button (click)="editar(atalho)" title="Editar">
                     <mat-icon>edit</mat-icon>
                   </button>

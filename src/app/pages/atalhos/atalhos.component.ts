@@ -214,6 +214,25 @@ export class AtalhosComponent implements OnInit {
     await this.carregar();
   }
 
+  /** Troca o atalho de posição com o vizinho e renumera a lista, definindo a ordem dos botões no registro de tarefas. */
+  async mover(atalho: Atalho, direcao: -1 | 1) {
+    const lista = this.atalhosFiltrados();
+    const origem = lista.indexOf(atalho);
+    const destino = origem + direcao;
+
+    if (destino < 0 || destino >= lista.length) {
+      return;
+    }
+
+    [lista[origem], lista[destino]] = [lista[destino], lista[origem]];
+
+    for (const [indice, item] of lista.entries()) {
+      await this.db.run("UPDATE atalhos SET ordem = ? WHERE id = ?", [indice + 1, item.id]);
+    }
+
+    await this.carregar();
+  }
+
   async remover(id: string) {
     if (!confirm("Tem certeza que deseja excluir este atalho?")) {
       return;

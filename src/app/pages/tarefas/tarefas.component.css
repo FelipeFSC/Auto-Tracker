@@ -49,8 +49,18 @@
 
 .modo-exibicao-row {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 10px;
+}
+
+.modo-exibicao-row .modo-exibicao {
+  margin-left: auto;
+}
+
+.saldo-mes {
+  font-size: 14px;
+  color: var(--cor-texto-fraco);
 }
 
 .modo-exibicao {
@@ -174,6 +184,10 @@
 .dia-total {
   font-weight: 700;
   color: var(--cor-primaria);
+}
+
+.dia-saldo {
+  font-weight: 700;
 }
 
 .icone-expand {

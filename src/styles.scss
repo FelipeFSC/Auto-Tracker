@@ -36,6 +36,12 @@ html {
   --cor-texto: #202124;
   --cor-texto-fraco: #6b7280;
   --cor-borda: #dfe3e8;
+
+  --cor-saldo-positivo: #15803d;
+  --cor-saldo-negativo: #dc2626;
+  --cor-aviso: #b45309;
+  --cor-aviso-fraca: #fef3c7;
+
   --raio-padrao: 10px;
 }
 
@@ -53,6 +59,14 @@ body {
   border: 1px solid #e7e9ee;
   border-radius: var(--raio-padrao);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.saldo-positivo {
+  color: var(--cor-saldo-positivo);
+}
+
+.saldo-negativo {
+  color: var(--cor-saldo-negativo);
 }
 
 /* Global porque o tooltip do Material é renderizado fora do componente, no overlay. */
