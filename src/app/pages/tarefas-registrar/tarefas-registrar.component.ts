@@ -78,6 +78,7 @@ export class TarefasRegistrarComponent implements OnInit {
     hora_entrada: null,
     jornada_minutos: null,
     tolerancia_minutos: 0,
+    tema: "claro",
   };
 
   salvando = false;

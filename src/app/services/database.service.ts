@@ -32,7 +32,11 @@ export interface Configuracoes {
   /** Sem jornada configurada, o saldo de horas não é calculado. */
   jornada_minutos: number | null;
   tolerancia_minutos: number;
+  /** "sistema" segue o tema claro/escuro do Windows. */
+  tema: Tema;
 }
+
+export type Tema = "claro" | "escuro" | "sistema";
 
 @Injectable({
   providedIn: "root",
@@ -164,6 +168,7 @@ export class DatabaseService {
         hora_entrada TEXT,
         jornada_minutos INTEGER,
         tolerancia_minutos INTEGER NOT NULL DEFAULT 0,
+        tema TEXT NOT NULL DEFAULT 'claro',
 
         FOREIGN KEY (usuario_id)
           REFERENCES usuarios (id)
@@ -265,6 +270,7 @@ export class DatabaseService {
     const tentativas: [string, string][] = [
       ["solicitantes", "descricao TEXT"],
       ["atalhos", "aplicar_duracao TEXT NOT NULL DEFAULT 'fim'"],
+      ["configuracoes", "tema TEXT NOT NULL DEFAULT 'claro'"],
     ];
 
     for (const [tabela, colunaDef] of tentativas) {
@@ -376,7 +382,7 @@ export class DatabaseService {
 
   async obterConfiguracoes(): Promise<Configuracoes> {
     const [configuracoes] = await this.query<Configuracoes>(
-      `SELECT hora_entrada, jornada_minutos, tolerancia_minutos
+      `SELECT hora_entrada, jornada_minutos, tolerancia_minutos, tema
        FROM configuracoes
        WHERE usuario_id = ?`,
       [USUARIO_LOCAL_ID],

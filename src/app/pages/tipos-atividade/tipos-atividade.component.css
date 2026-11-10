@@ -75,7 +75,7 @@
   display: block;
   font-size: 13px;
   font-weight: 600;
-  color: #374151;
+  color: var(--cor-texto-medio);
   margin-bottom: 7px;
 }
 
@@ -116,7 +116,7 @@
   padding: 3px;
   border: 1px solid var(--cor-borda);
   border-radius: 10px;
-  background: #f7f9fc;
+  background: var(--cor-superficie-alt);
 }
 
 .filtro-status button {
@@ -131,7 +131,7 @@
 }
 
 .filtro-status button:hover {
-  background: #edf0f3;
+  background: var(--cor-hover);
 }
 
 .filtro-status button.ativo {
@@ -145,7 +145,7 @@
 }
 
 .item {
-  border-bottom: 1px solid #edf0f3;
+  border-bottom: 1px solid var(--cor-borda-suave);
 }
 
 .item:last-child {
@@ -195,7 +195,7 @@
 
 .item-edit-form {
   padding: 14px 8px;
-  background: #fafbfc;
+  background: var(--cor-superficie-alt);
   border-radius: 9px;
   display: flex;
   flex-wrap: wrap;
@@ -222,7 +222,7 @@
   font-size: 36px;
   width: 36px;
   height: 36px;
-  color: #c5cad3;
+  color: var(--cor-texto-desabilitado);
   margin-bottom: 8px;
 }
 

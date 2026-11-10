@@ -7,7 +7,7 @@
   justify-content: space-between;
   gap: 24px;
 
-  background: var(--cor-primaria);
+  background: var(--cor-topbar);
   color: #fff;
 
   position: sticky;
@@ -104,10 +104,10 @@
 
   min-width: 200px;
 
-  background: #fff;
-  border: 1px solid #e7e9ee;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda-suave);
   border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--sombra-menu);
 
   padding: 6px;
 
@@ -132,7 +132,7 @@
   border: none;
   background: transparent;
 
-  color: #374151;
+  color: var(--cor-texto-medio);
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
@@ -144,12 +144,12 @@
 .gear-menu a .material-icons,
 .gear-menu button .material-icons {
   font-size: 18px;
-  color: #6b7280;
+  color: var(--cor-texto-fraco);
 }
 
 .gear-menu a:hover,
 .gear-menu button:hover {
-  background: #f3f4f6;
+  background: var(--cor-hover);
 }
 
 .gear-menu a.active {

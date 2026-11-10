@@ -3,12 +3,15 @@
 @use "@angular/material" as mat;
 
 html {
+  /* theme-type "color-scheme" gera os tokens do Material com light-dark(),
+     então trocar o color-scheme abaixo (via data-tema) já troca o Material
+     inteiro entre claro e escuro, sem precisar de dois temas. */
   color-scheme: light;
 
   @include mat.theme(
     (
       color: (
-        theme-type: light,
+        theme-type: color-scheme,
         primary: mat.$violet-palette,
         tertiary: mat.$blue-palette,
       ),
@@ -33,21 +36,81 @@ html {
   --cor-atalho-hover: #2258c9;
   --cor-atalho-fraca: #e8f0fe;
 
+  --cor-topbar: var(--cor-primaria);
+
+  /* Superfícies: fundo da página, cards/modais, faixas internas
+     (filtros, linha expandida) e hovers. */
+  --cor-fundo: #f4f2fa;
+  --cor-superficie: #fff;
+  --cor-superficie-alt: #f7f9fc;
+  --cor-hover: #f0f2f5;
+  --cor-linha-hover: #faf9ff;
+
   --cor-texto: #202124;
+  --cor-texto-medio: #374151;
   --cor-texto-fraco: #6b7280;
+  --cor-texto-desabilitado: #c5cad3;
+
   --cor-borda: #dfe3e8;
+  --cor-borda-suave: #edf0f3;
 
   --cor-saldo-positivo: #15803d;
   --cor-saldo-negativo: #dc2626;
   --cor-aviso: #b45309;
   --cor-aviso-fraca: #fef3c7;
 
+  --cor-overlay: rgba(15, 23, 42, 0.45);
+  --sombra-card: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --sombra-menu: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --sombra-modal: 0 20px 60px rgba(0, 0, 0, 0.18);
+
   --raio-padrao: 10px;
+}
+
+/* Modo escuro: mesma identidade (roxo + azul dos atalhos), com fundos
+   grafite levemente arroxeados em vez de preto puro. Ativado pelo
+   TemaService, que coloca data-tema="escuro" no <html>. */
+:root[data-tema="escuro"] {
+  color-scheme: dark;
+
+  --cor-primaria: #7c5ff0;
+  --cor-primaria-hover: #9178f5;
+  --cor-primaria-fraca: rgba(124, 95, 240, 0.18);
+
+  --cor-atalho: #3b7bf0;
+  --cor-atalho-hover: #5a91f4;
+  --cor-atalho-fraca: rgba(59, 123, 240, 0.18);
+
+  --cor-topbar: #241c45;
+
+  --cor-fundo: #131219;
+  --cor-superficie: #1c1b25;
+  --cor-superficie-alt: #22212d;
+  --cor-hover: #2b2a38;
+  --cor-linha-hover: #221f31;
+
+  --cor-texto: #e8e6f0;
+  --cor-texto-medio: #c6c3d4;
+  --cor-texto-fraco: #9693a8;
+  --cor-texto-desabilitado: #4f4c60;
+
+  --cor-borda: #363445;
+  --cor-borda-suave: #2a2836;
+
+  --cor-saldo-positivo: #4ade80;
+  --cor-saldo-negativo: #f87171;
+  --cor-aviso: #fbbf24;
+  --cor-aviso-fraca: rgba(251, 191, 36, 0.14);
+
+  --cor-overlay: rgba(0, 0, 0, 0.6);
+  --sombra-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --sombra-menu: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --sombra-modal: 0 20px 60px rgba(0, 0, 0, 0.55);
 }
 
 body {
   font-family: "Inter", "Segoe UI", Arial, Helvetica, sans-serif;
-  background-color: #f4f2fa;
+  background-color: var(--cor-fundo);
   color: var(--cor-texto);
   margin: 0;
   padding: 0;
@@ -55,10 +118,10 @@ body {
 
 .card {
   padding: 20px;
-  background: #fff;
-  border: 1px solid #e7e9ee;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda-suave);
   border-radius: var(--raio-padrao);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--sombra-card);
 }
 
 .saldo-positivo {

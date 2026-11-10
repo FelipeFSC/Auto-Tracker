@@ -4,6 +4,27 @@
     <p>Defina seu horário de trabalho para o sistema calcular o saldo de horas.</p>
   </div>
 
+  <section class="card card-aparencia">
+    <div class="aparencia-texto">
+      <h3>Aparência</h3>
+      <p>Aplicado na hora. "Sistema" acompanha o tema do Windows.</p>
+    </div>
+
+    <div class="seletor-tema" role="radiogroup" aria-label="Tema">
+      <button
+        type="button"
+        role="radio"
+        *ngFor="let opcao of opcoesTema"
+        [class.ativo]="tema.tema() === opcao.valor"
+        [attr.aria-checked]="tema.tema() === opcao.valor"
+        (click)="tema.definir(opcao.valor)"
+      >
+        <mat-icon>{{ opcao.icone }}</mat-icon>
+        {{ opcao.rotulo }}
+      </button>
+    </div>
+  </section>
+
   <section class="card">
     <form (submit)="salvar($event)" (input)="salvo = false">
       <mat-form-field appearance="outline" class="full-width">

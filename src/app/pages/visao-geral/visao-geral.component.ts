@@ -6,6 +6,7 @@ import {
   OnDestroy,
   OnInit,
   ViewChild,
+  effect,
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
@@ -15,6 +16,7 @@ import {
   DatabaseService,
   USUARIO_LOCAL_ID,
 } from "../../services/database.service";
+import { TemaService } from "../../services/tema.service";
 
 interface TarefaMes {
   data: string;
@@ -55,7 +57,16 @@ export class VisaoGeralComponent implements OnInit, AfterViewInit, OnDestroy {
     solicitantes: echarts.ECharts | null;
   } = { dias: null, tipos: null, solicitantes: null };
 
-  constructor(private db: DatabaseService) {}
+  constructor(
+    private db: DatabaseService,
+    tema: TemaService,
+  ) {
+    // Redesenha os gráficos quando o tema muda (inclusive "Sistema" trocando sozinho).
+    effect(() => {
+      tema.escuro();
+      this.renderizarGraficos();
+    });
+  }
 
   private mesAtual(): string {
     const hoje = new Date();
@@ -191,29 +202,35 @@ export class VisaoGeralComponent implements OnInit, AfterViewInit, OnDestroy {
       this.charts.dias = chart;
     }
 
+    const cores = this.coresTema();
+
     chart.setOption({
       grid: { left: 40, right: 16, top: 24, bottom: 28 },
       tooltip: {
         trigger: "axis",
+        ...this.estiloTooltip(cores),
         valueFormatter: (v: number) => this.db.formatarDuracao(Math.round(v * 60)),
       },
       xAxis: {
         type: "category",
         data: categorias,
         axisTick: { show: false },
-        axisLine: { lineStyle: { color: "#dfe3e8" } },
+        axisLine: { lineStyle: { color: cores.borda } },
+        axisLabel: { color: cores.textoFraco },
       },
       yAxis: {
         type: "value",
         name: "horas",
-        splitLine: { lineStyle: { color: "#f0f0f5" } },
+        nameTextStyle: { color: cores.textoFraco },
+        axisLabel: { color: cores.textoFraco },
+        splitLine: { lineStyle: { color: cores.bordaSuave } },
       },
       series: [
         {
           type: "bar",
           data: valores,
           barMaxWidth: 18,
-          itemStyle: { color: "#6d4fe0", borderRadius: [4, 4, 0, 0] },
+          itemStyle: { color: cores.primaria, borderRadius: [4, 4, 0, 0] },
         },
       ],
     });
@@ -242,10 +259,13 @@ export class VisaoGeralComponent implements OnInit, AfterViewInit, OnDestroy {
       this.charts[chartKey] = chart;
     }
 
+    const cores = this.coresTema();
+
     chart.setOption({
       color: PALETA,
       tooltip: {
         trigger: "item",
+        ...this.estiloTooltip(cores),
         valueFormatter: (v: number) => this.db.formatarDuracao(Math.round(v * 60)),
       },
       legend: {
@@ -255,20 +275,53 @@ export class VisaoGeralComponent implements OnInit, AfterViewInit, OnDestroy {
         top: "middle",
         bottom: 8,
         // Nomes longos invadiam a rosca: corta com "..." e mostra o nome inteiro no hover.
-        textStyle: { fontSize: 12, width: 130, overflow: "truncate", ellipsis: "..." },
-        tooltip: { show: true },
+        textStyle: {
+          fontSize: 12,
+          width: 130,
+          overflow: "truncate",
+          ellipsis: "...",
+          color: cores.texto,
+        },
+        pageTextStyle: { color: cores.textoFraco },
+        pageIconColor: cores.primaria,
+        pageIconInactiveColor: cores.bordaSuave,
+        tooltip: { show: true, ...this.estiloTooltip(cores) },
       },
       series: [
         {
           type: "pie",
           radius: ["45%", "70%"],
           center: ["38%", "50%"],
-          itemStyle: { borderRadius: 6, borderColor: "#fff", borderWidth: 2 },
+          // A borda é da cor do card, para separar as fatias nos dois temas.
+          itemStyle: { borderRadius: 6, borderColor: cores.superficie, borderWidth: 2 },
           label: { show: false },
           data: dados,
         },
       ],
     });
+  }
+
+  /** Lê as cores do tema atual direto das variáveis CSS do styles.scss. */
+  private coresTema() {
+    const estilo = getComputedStyle(document.documentElement);
+    const ler = (variavel: string) => estilo.getPropertyValue(variavel).trim();
+
+    return {
+      primaria: ler("--cor-primaria"),
+      superficie: ler("--cor-superficie"),
+      texto: ler("--cor-texto"),
+      textoFraco: ler("--cor-texto-fraco"),
+      borda: ler("--cor-borda"),
+      bordaSuave: ler("--cor-borda-suave"),
+    };
+  }
+
+  private estiloTooltip(cores: ReturnType<VisaoGeralComponent["coresTema"]>) {
+    return {
+      backgroundColor: cores.superficie,
+      borderColor: cores.borda,
+      textStyle: { color: cores.texto },
+    };
   }
 
   private renderizarGraficoTipos() {

@@ -15,7 +15,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  background: #fff;
+  background: var(--cor-superficie);
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio-padrao);
   padding: 4px 8px;
@@ -69,7 +69,7 @@
   padding: 3px;
   border: 1px solid var(--cor-borda);
   border-radius: 10px;
-  background: #f7f9fc;
+  background: var(--cor-superficie-alt);
 }
 
 .modo-exibicao button {
@@ -84,7 +84,7 @@
 }
 
 .modo-exibicao button:hover {
-  background: #edf0f3;
+  background: var(--cor-hover);
 }
 
 .modo-exibicao button.ativo {
@@ -103,7 +103,7 @@
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(15, 23, 42, 0.45);
+  background: var(--cor-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -113,10 +113,10 @@
 .modal {
   width: 100%;
   max-width: 360px;
-  background: #fff;
+  background: var(--cor-superficie);
   border-radius: 14px;
   padding: 24px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--sombra-modal);
 }
 
 .modal h3 {
@@ -151,7 +151,7 @@
   font-size: 12px;
   font-weight: 600;
   color: var(--cor-texto-fraco);
-  border-bottom: 1px solid #edf0f3;
+  border-bottom: 1px solid var(--cor-borda-suave);
 }
 
 .col-expand {
@@ -164,11 +164,11 @@
 
 .linha-dia {
   cursor: pointer;
-  border-bottom: 1px solid #edf0f3;
+  border-bottom: 1px solid var(--cor-borda-suave);
 }
 
 .linha-dia:hover {
-  background: #faf9ff;
+  background: var(--cor-linha-hover);
 }
 
 .linha-dia td {
@@ -201,14 +201,14 @@
 
 .linha-expandida td {
   padding: 0 16px 16px 56px;
-  background: #fafbfc;
+  background: var(--cor-superficie-alt);
 }
 
 .sub-tabela {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
-  border: 1px solid #edf0f3;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda-suave);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -219,13 +219,13 @@
   font-size: 11px;
   font-weight: 600;
   color: var(--cor-texto-fraco);
-  background: #f4f2fa;
+  background: var(--cor-fundo);
 }
 
 .sub-tabela tbody td {
   padding: 8px 12px;
   font-size: 13px;
-  border-top: 1px solid #edf0f3;
+  border-top: 1px solid var(--cor-borda-suave);
 }
 
 /* VAZIO */
@@ -243,7 +243,7 @@
   font-size: 40px;
   width: 40px;
   height: 40px;
-  color: #c5cad3;
+  color: var(--cor-texto-desabilitado);
   margin-bottom: 10px;
 }
 

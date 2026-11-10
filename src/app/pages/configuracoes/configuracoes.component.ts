@@ -7,8 +7,10 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon";
 import {
   DatabaseService,
+  Tema,
   USUARIO_LOCAL_ID,
 } from "../../services/database.service";
+import { TemaService } from "../../services/tema.service";
 
 @Component({
   selector: "app-configuracoes",
@@ -31,7 +33,16 @@ export class ConfiguracoesComponent implements OnInit {
 
   salvo = false;
 
-  constructor(private db: DatabaseService) {}
+  readonly opcoesTema: { valor: Tema; rotulo: string; icone: string }[] = [
+    { valor: "claro", rotulo: "Claro", icone: "light_mode" },
+    { valor: "escuro", rotulo: "Escuro", icone: "dark_mode" },
+    { valor: "sistema", rotulo: "Sistema", icone: "contrast" },
+  ];
+
+  constructor(
+    private db: DatabaseService,
+    public tema: TemaService,
+  ) {}
 
   async ngOnInit() {
     const configuracoes = await this.db.obterConfiguracoes();
