@@ -30,6 +30,7 @@ export class ConfiguracoesComponent implements OnInit {
   horaEntrada = "";
   jornada = "";
   toleranciaMinutos: number | null = 0;
+  paioArredondamentoMinutos: number | null = 15;
 
   salvo = false;
 
@@ -53,6 +54,7 @@ export class ConfiguracoesComponent implements OnInit {
         ? this.minutosParaHora(configuracoes.jornada_minutos)
         : "";
     this.toleranciaMinutos = configuracoes.tolerancia_minutos;
+    this.paioArredondamentoMinutos = configuracoes.paio_arredondamento_minutos ?? 15;
   }
 
   private minutosParaHora(minutos: number): string {
@@ -75,19 +77,29 @@ export class ConfiguracoesComponent implements OnInit {
       return;
     }
 
+    const paio = this.paioArredondamentoMinutos ?? 15;
+
+    if (!Number.isInteger(paio) || paio < 1 || paio > 30) {
+      alert("O arredondamento do PAIO deve ser um número inteiro de minutos entre 1 e 30.");
+      return;
+    }
+
     await this.db.run(
       `UPDATE configuracoes
-       SET hora_entrada = ?, jornada_minutos = ?, tolerancia_minutos = ?
+       SET hora_entrada = ?, jornada_minutos = ?, tolerancia_minutos = ?,
+           paio_arredondamento_minutos = ?
        WHERE usuario_id = ?`,
       [
         this.horaEntrada || null,
         this.jornada ? this.horaParaMinutos(this.jornada) : null,
         tolerancia,
+        paio,
         USUARIO_LOCAL_ID,
       ],
     );
 
     this.toleranciaMinutos = tolerancia;
+    this.paioArredondamentoMinutos = paio;
     this.salvo = true;
   }
 }

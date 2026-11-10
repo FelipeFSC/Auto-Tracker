@@ -61,6 +61,14 @@
       <button type="button" [class.ativo]="modoExibicao === 'agrupada'" (click)="definirModoExibicao('agrupada')">
         Agrupada
       </button>
+      <button
+        type="button"
+        [class.ativo]="modoExibicao === 'paio'"
+        (click)="definirModoExibicao('paio')"
+        title="Tarefas agrupadas com as horas arredondadas em meias horas, como o PAIO exige"
+      >
+        PAIO
+      </button>
     </div>
   </div>
 
@@ -86,7 +94,13 @@
             </td>
             <td class="dia-nome">{{ dia.dataFormatada }}</td>
             <td>{{ dia.tarefas.length }} tarefa(s)</td>
-            <td class="dia-total">{{ modoExibicao === 'agrupada' ? dia.totalLabelDecimal : dia.totalLabel }}</td>
+            <td class="dia-total">
+              <ng-container [ngSwitch]="modoExibicao">
+                <ng-container *ngSwitchCase="'agrupada'">{{ dia.totalLabelDecimal }}</ng-container>
+                <ng-container *ngSwitchCase="'paio'">{{ dia.totalPaioLabel }}</ng-container>
+                <ng-container *ngSwitchDefault>{{ dia.totalLabel }}</ng-container>
+              </ng-container>
+            </td>
             <td
               class="dia-saldo"
               *ngIf="saldoMesMinutos !== null"
@@ -161,6 +175,30 @@
                     <td>{{ grupo.observacoes || "—" }}</td>
                     <td>{{ grupo.quantidade }}x</td>
                     <td class="grupo-total">{{ grupo.totalLabel }}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- PAIO: agrupada, com as horas arredondadas em meias horas -->
+              <table class="sub-tabela" *ngIf="modoExibicao === 'paio'">
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>Solicitante</th>
+                    <th>OS</th>
+                    <th>Observações</th>
+                    <th>Duração real</th>
+                    <th>Horas PAIO</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let grupo of dia.tarefasAgrupadas">
+                    <td>{{ grupo.tipoAtividadeNome || "—" }}</td>
+                    <td>{{ grupo.solicitanteNome || "—" }}</td>
+                    <td>{{ grupo.os || "—" }}</td>
+                    <td>{{ grupo.observacoes || "—" }}</td>
+                    <td class="duracao-real">{{ grupo.totalLabelHoras }}</td>
+                    <td class="grupo-total">{{ grupo.horasPaioLabel }}</td>
                   </tr>
                 </tbody>
               </table>

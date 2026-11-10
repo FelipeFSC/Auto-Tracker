@@ -42,6 +42,10 @@ interface TarefaAgrupada {
   observacoes: string | null;
   totalMinutos: number;
   totalLabel: string;
+  /** Duração real em "1h40", exibida na visão PAIO ao lado das horas arredondadas. */
+  totalLabelHoras: string;
+  horasPaio: number;
+  horasPaioLabel: string;
   quantidade: number;
 }
 
@@ -53,11 +57,14 @@ interface DiaAgrupado {
   totalMinutos: number;
   totalLabel: string;
   totalLabelDecimal: string;
+  /** Soma das horas PAIO já arredondadas de cada tarefa agrupada. */
+  totalPaioLabel: string;
   saldoMinutos: number | null;
   saldoLabel: string;
 }
 
-type ModoExibicao = "detalhada" | "agrupada";
+/** "paio": igual à agrupada, mas com as horas arredondadas em meias horas como o PAIO exige. */
+type ModoExibicao = "detalhada" | "agrupada" | "paio";
 
 @Component({
   selector: "app-tarefas",
@@ -181,12 +188,15 @@ export class TarefasComponent implements OnInit {
     });
 
     const saldoMinutos = this.db.calcularSaldoDiaMinutos(data, tarefas, this.configuracoes);
+    const tarefasAgrupadas = this.agruparTarefasIguais(tarefasExibicao);
+    const totalPaio = tarefasAgrupadas.reduce((soma, grupo) => soma + grupo.horasPaio, 0);
 
     return {
       data,
       dataFormatada: this.formatarDataExibicao(data),
       tarefas: tarefasExibicao,
-      tarefasAgrupadas: this.agruparTarefasIguais(tarefasExibicao),
+      tarefasAgrupadas,
+      totalPaioLabel: this.db.formatarHorasPaio(totalPaio),
       totalMinutos,
       totalLabel: this.db.formatarDuracao(totalMinutos),
       totalLabelDecimal: this.db.formatarDuracaoDecimal(totalMinutos),
@@ -221,13 +231,29 @@ export class TarefasComponent implements OnInit {
           observacoes: tarefa.observacoes,
           totalMinutos: minutos,
           totalLabel: "",
+          totalLabelHoras: "",
+          horasPaio: 0,
+          horasPaioLabel: "",
           quantidade: 1,
         });
       }
     }
 
+    const limitePaio = this.configuracoes.paio_arredondamento_minutos ?? 15;
+
     return Array.from(mapa.values())
-      .map((grupo) => ({ ...grupo, totalLabel: this.db.formatarDuracaoDecimal(grupo.totalMinutos) }))
+      .map((grupo) => {
+        // O PAIO arredonda o grupo já somado, não cada lançamento.
+        const horasPaio = this.db.calcularHorasPaio(grupo.totalMinutos, limitePaio);
+
+        return {
+          ...grupo,
+          totalLabel: this.db.formatarDuracaoDecimal(grupo.totalMinutos),
+          totalLabelHoras: this.db.formatarDuracao(grupo.totalMinutos),
+          horasPaio,
+          horasPaioLabel: this.db.formatarHorasPaio(horasPaio),
+        };
+      })
       .sort((a, b) => b.totalMinutos - a.totalMinutos);
   }
 

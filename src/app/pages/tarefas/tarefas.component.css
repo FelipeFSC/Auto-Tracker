@@ -97,6 +97,10 @@
   color: var(--cor-primaria);
 }
 
+.duracao-real {
+  color: var(--cor-texto-fraco);
+}
+
 /* MODAL */
 
 .modal-overlay {

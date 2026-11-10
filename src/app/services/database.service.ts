@@ -34,6 +34,8 @@ export interface Configuracoes {
   tolerancia_minutos: number;
   /** "sistema" segue o tema claro/escuro do Windows. */
   tema: Tema;
+  /** Sobra (em minutos) a partir da qual a visão PAIO sobe para a próxima meia hora. */
+  paio_arredondamento_minutos: number;
 }
 
 export type Tema = "claro" | "escuro" | "sistema";
@@ -169,6 +171,7 @@ export class DatabaseService {
         jornada_minutos INTEGER,
         tolerancia_minutos INTEGER NOT NULL DEFAULT 0,
         tema TEXT NOT NULL DEFAULT 'claro',
+        paio_arredondamento_minutos INTEGER NOT NULL DEFAULT 15,
 
         FOREIGN KEY (usuario_id)
           REFERENCES usuarios (id)
@@ -271,6 +274,7 @@ export class DatabaseService {
       ["solicitantes", "descricao TEXT"],
       ["atalhos", "aplicar_duracao TEXT NOT NULL DEFAULT 'fim'"],
       ["configuracoes", "tema TEXT NOT NULL DEFAULT 'claro'"],
+      ["configuracoes", "paio_arredondamento_minutos INTEGER NOT NULL DEFAULT 15"],
     ];
 
     for (const [tabela, colunaDef] of tentativas) {
@@ -366,6 +370,31 @@ export class DatabaseService {
   }
 
   /**
+   * Converte uma duração para as horas do PAIO, que só aceita múltiplos
+   * de meia hora (0.5, 1, 1.5...). Olha a sobra além da última meia hora
+   * cheia: com `limiteMinutos` ou mais, sobe para a próxima meia hora;
+   * abaixo disso, desce. Qualquer tarefa com duração conta no mínimo 0.5.
+   *
+   * Ex. com limite 15: 1h10 → 1 · 1h15 → 1.5 · 1h40 → 1.5 · 1h45 → 2 · 0h10 → 0.5
+   */
+  calcularHorasPaio(minutos: number, limiteMinutos: number): number {
+    if (minutos <= 0) {
+      return 0;
+    }
+
+    const meiasHoras = Math.floor(minutos / 30);
+    const sobra = minutos % 30;
+    const arredondado = sobra > 0 && sobra >= limiteMinutos ? meiasHoras + 1 : meiasHoras;
+
+    return Math.max(arredondado, 1) / 2;
+  }
+
+  /** Horas do PAIO no formato em que são lançadas lá: "0.5", "1", "1.5". */
+  formatarHorasPaio(horas: number): string {
+    return String(horas);
+  }
+
+  /**
    * Formata um saldo em minutos com sinal, ex.: "+1h30", "-45min".
    */
   formatarSaldo(minutos: number): string {
@@ -382,7 +411,7 @@ export class DatabaseService {
 
   async obterConfiguracoes(): Promise<Configuracoes> {
     const [configuracoes] = await this.query<Configuracoes>(
-      `SELECT hora_entrada, jornada_minutos, tolerancia_minutos, tema
+      `SELECT hora_entrada, jornada_minutos, tolerancia_minutos, tema, paio_arredondamento_minutos
        FROM configuracoes
        WHERE usuario_id = ?`,
       [USUARIO_LOCAL_ID],

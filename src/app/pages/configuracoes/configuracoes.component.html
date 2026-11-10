@@ -45,6 +45,12 @@
         <mat-hint>Até esse limite, o saldo do dia é zero. Acima dele, conta a diferença inteira.</mat-hint>
       </mat-form-field>
 
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Arredondamento PAIO (minutos)</mat-label>
+        <input matInput type="number" min="1" max="30" step="1" [(ngModel)]="paioArredondamentoMinutos" name="paioArredondamentoMinutos" />
+        <mat-hint>Sobra além da meia hora a partir da qual sobe para a próxima. Ex. com 15: 1h10 → 1, 1h20 → 1.5.</mat-hint>
+      </mat-form-field>
+
       <div class="acoes">
         <span class="mensagem-salvo" *ngIf="salvo">
           <mat-icon>check_circle</mat-icon>
