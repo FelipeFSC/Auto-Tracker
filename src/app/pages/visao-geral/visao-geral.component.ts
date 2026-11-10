@@ -249,10 +249,14 @@ export class VisaoGeralComponent implements OnInit, AfterViewInit, OnDestroy {
         valueFormatter: (v: number) => this.db.formatarDuracao(Math.round(v * 60)),
       },
       legend: {
+        type: "scroll",
         orient: "vertical",
         right: 8,
         top: "middle",
-        textStyle: { fontSize: 12 },
+        bottom: 8,
+        // Nomes longos invadiam a rosca: corta com "..." e mostra o nome inteiro no hover.
+        textStyle: { fontSize: 12, width: 130, overflow: "truncate", ellipsis: "..." },
+        tooltip: { show: true },
       },
       series: [
         {
